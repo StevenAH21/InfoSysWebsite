@@ -253,6 +253,7 @@ section {
   position: relative;
   z-index: 1;
   filter: drop-shadow(0 4px 20px rgba(0,0,0,0.1));
+  border-radius: 50%
 }
  
 @keyframes pulse-ring {
@@ -1446,3 +1447,4 @@ section {
   border-radius: 4px;
   font-size: 0.85em;
 }
+ 
