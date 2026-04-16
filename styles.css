@@ -61,6 +61,8 @@ p { max-width: 70ch; }
   font-size: 1.1rem;
   margin-top: 0.5rem;
   max-width: 600px;
+  text-align: center;
+  margin: 0.5rem auto 0;
 }
  
 /* ===== Layout ===== */
@@ -407,7 +409,7 @@ section {
 }
  
 .mission-image {
-  background: linear-gradient(135deg, rgba(197, 5, 12, 0.1), rgba(197, 5, 12, 0.03));
+  background: transparent;
   border-radius: var(--radius);
   height: 360px;
   display: flex;
