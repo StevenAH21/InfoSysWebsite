@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ── Admin-only styles ── */
     .admin-nav-bar { background: #1a1a1a; color: white; padding: 0.6rem 0; font-size: 0.82rem; }
     .admin-nav-bar .container { display: flex; justify-content: space-between; align-items: center; }
     .admin-nav-bar span { opacity: 0.7; }
@@ -52,6 +51,7 @@
     .admin-table .btn-icon { background: none; border: none; cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 5px; font-size: 0.8rem; color: var(--gray-500); transition: all 0.2s; }
     .admin-table .btn-icon:hover { background: var(--gray-100); color: var(--gray-900); }
     .admin-table .btn-icon.del:hover { background: #fee2e2; color: #991b1b; }
+    .admin-table .btn-icon.edit-btn:hover { background: #dbeafe; color: #1d4ed8; }
  
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
     .stat-box { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
@@ -60,11 +60,15 @@
     .stat-box-info h3 { font-size: 1.6rem; font-weight: 700; margin: 0; }
     .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
     .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.4; }
+ 
+    .btn-cancel { background: var(--gray-100); color: var(--gray-700); border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+    .btn-cancel:hover { background: var(--gray-200); }
+    .editing-banner { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #1d4ed8; display: none; }
+    .editing-banner.active { display: flex; align-items: center; gap: 0.5rem; }
   </style>
 </head>
 <body>
  
-  <!-- Admin top bar -->
   <div class="admin-nav-bar" id="adminBar">
     <div class="container">
       <span><i class="fas fa-shield-halved"></i> Admin Dashboard &mdash; <span id="adminEmail">loading...</span></span>
@@ -75,7 +79,6 @@
     </div>
   </div>
  
-  <!-- No regular navbar — admins don't need it -->
   <section class="page-hero admin-hero" style="padding: 2.5rem 0;">
     <div class="container">
       <h1>Admin <span>Dashboard</span></h1>
@@ -106,7 +109,9 @@
       <!-- ── EVENTS PANEL ── -->
       <div class="admin-panel active" id="panel-events">
         <div class="admin-form">
-          <h3><i class="fas fa-plus-circle"></i> Add New Event</h3>
+          <div class="editing-banner" id="ev-editing-banner"><i class="fas fa-pen"></i> <span id="ev-editing-label">Editing event</span></div>
+          <h3 id="ev-form-title"><i class="fas fa-plus-circle"></i> Add New Event</h3>
+          <input type="hidden" id="ev-edit-id">
           <div class="admin-field"><label>Title *</label><input type="text" id="ev-title" placeholder="Alumni Panel: Tech Consulting"></div>
           <div class="admin-field"><label>Description *</label><textarea id="ev-desc" placeholder="Short description of the event..."></textarea></div>
           <div class="admin-row-3">
@@ -124,6 +129,7 @@
           <div class="admin-field"><label>Location *</label><input type="text" id="ev-location" placeholder="Grainger Hall 1120"></div>
           <div class="admin-form-actions">
             <button class="btn btn-primary" id="ev-save"><i class="fas fa-floppy-disk"></i> Save Event</button>
+            <button class="btn-cancel" id="ev-cancel" style="display:none;">Cancel Edit</button>
           </div>
           <p class="admin-msg" id="ev-msg"></p>
         </div>
@@ -138,7 +144,9 @@
       <!-- ── JOB POSTINGS PANEL ── -->
       <div class="admin-panel" id="panel-jobs">
         <div class="admin-form">
-          <h3><i class="fas fa-plus-circle"></i> Add Job Posting</h3>
+          <div class="editing-banner" id="job-editing-banner"><i class="fas fa-pen"></i> <span id="job-editing-label">Editing job</span></div>
+          <h3 id="job-form-title"><i class="fas fa-plus-circle"></i> Add Job Posting</h3>
+          <input type="hidden" id="job-edit-id">
           <div class="admin-row-2">
             <div class="admin-field"><label>Job Title *</label><input type="text" id="job-title" placeholder="Software Engineer Intern"></div>
             <div class="admin-field"><label>Company *</label><input type="text" id="job-company" placeholder="Epic Systems"></div>
@@ -147,6 +155,7 @@
           <div class="admin-field"><label>Application Link *</label><input type="url" id="job-link" placeholder="https://..."></div>
           <div class="admin-form-actions">
             <button class="btn btn-primary" id="job-save"><i class="fas fa-floppy-disk"></i> Post Job</button>
+            <button class="btn-cancel" id="job-cancel" style="display:none;">Cancel Edit</button>
           </div>
           <p class="admin-msg" id="job-msg"></p>
         </div>
@@ -161,28 +170,32 @@
       <!-- ── EXEC BOARD PANEL ── -->
       <div class="admin-panel" id="panel-board">
         <div class="admin-form">
-          <h3><i class="fas fa-plus-circle"></i> Add Board Member</h3>
+          <div class="editing-banner" id="bd-editing-banner"><i class="fas fa-pen"></i> <span id="bd-editing-label">Editing member</span></div>
+          <h3 id="bd-form-title"><i class="fas fa-plus-circle"></i> Add Board Member</h3>
+          <input type="hidden" id="bd-edit-id">
           <div class="admin-row-2">
             <div class="admin-field"><label>Full Name *</label><input type="text" id="bd-name" placeholder="Jane Smith"></div>
             <div class="admin-field"><label>Role / Title *</label><input type="text" id="bd-role" placeholder="VP of Events"></div>
           </div>
-          <div class="admin-row-2">
-          <div class="admin-field"><label>Year</label><input type="text" id="bd-year" placeholder="e.g. Senior or 2025-2026"></div>
-          <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="bd-photo" placeholder="https://..."></div>
+          <div class="admin-row-3">
+            <div class="admin-field"><label>Year</label><input type="text" id="bd-year" placeholder="e.g. Senior or 2025-2026"></div>
+            <div class="admin-field"><label>Display Order</label><input type="number" id="bd-order" placeholder="1, 2, 3..."></div>
+            <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="bd-photo" placeholder="https://..."></div>
           </div>
           <div class="admin-row-2">
-          <div class="admin-field"><label>LinkedIn URL (optional)</label><input type="url" id="bd-linkedin" placeholder="https://linkedin.com/in/..."></div>
-          <div class="admin-field"><label>Email (optional)</label><input type="email" id="bd-email" placeholder="you@wisc.edu"></div>
+            <div class="admin-field"><label>LinkedIn URL (optional)</label><input type="url" id="bd-linkedin" placeholder="https://linkedin.com/in/..."></div>
+            <div class="admin-field"><label>Email (optional)</label><input type="email" id="bd-email" placeholder="you@wisc.edu"></div>
           </div>
           <div class="admin-form-actions">
             <button class="btn btn-primary" id="bd-save"><i class="fas fa-floppy-disk"></i> Add Member</button>
+            <button class="btn-cancel" id="bd-cancel" style="display:none;">Cancel Edit</button>
           </div>
           <p class="admin-msg" id="bd-msg"></p>
         </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Year</th><th>Actions</th></tr></thead>
-            <tbody id="bd-tbody"><tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+            <thead><tr><th>Name</th><th>Role</th><th>Year</th><th>Order</th><th>Actions</th></tr></thead>
+            <tbody id="bd-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -190,12 +203,15 @@
       <!-- ── ACHIEVEMENTS PANEL ── -->
       <div class="admin-panel" id="panel-achievements">
         <div class="admin-form">
-          <h3><i class="fas fa-plus-circle"></i> Add Achievement</h3>
+          <div class="editing-banner" id="ach-editing-banner"><i class="fas fa-pen"></i> <span id="ach-editing-label">Editing achievement</span></div>
+          <h3 id="ach-form-title"><i class="fas fa-plus-circle"></i> Add Achievement</h3>
+          <input type="hidden" id="ach-edit-id">
           <div class="admin-field"><label>Title *</label><input type="text" id="ach-title" placeholder="1st Place — Case Competition"></div>
           <div class="admin-field"><label>Description *</label><textarea id="ach-desc" placeholder="Brief description..."></textarea></div>
           <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div>
           <div class="admin-form-actions">
             <button class="btn btn-primary" id="ach-save"><i class="fas fa-floppy-disk"></i> Save Achievement</button>
+            <button class="btn-cancel" id="ach-cancel" style="display:none;">Cancel Edit</button>
           </div>
           <p class="admin-msg" id="ach-msg"></p>
         </div>
@@ -263,7 +279,18 @@
       return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     }
  
+    function resetForm(fields, editIdField, bannerEl, titleEl, saveBtn, cancelBtn, defaultTitle, defaultSaveLabel) {
+      fields.forEach(id => document.getElementById(id).value = '');
+      document.getElementById(editIdField).value = '';
+      bannerEl.classList.remove('active');
+      titleEl.innerHTML = defaultTitle;
+      saveBtn.innerHTML = defaultSaveLabel;
+      cancelBtn.style.display = 'none';
+    }
+ 
+    // ══════════════════════════════════════════
     // ── EVENTS ──
+    // ══════════════════════════════════════════
     async function loadEvents() {
       const tbody = document.getElementById('ev-tbody');
       try {
@@ -273,6 +300,7 @@
         tbody.innerHTML = '';
         snap.forEach(d => {
           const ev = d.data();
+          const dataAttr = encodeURIComponent(JSON.stringify(ev));
           tbody.insertAdjacentHTML('beforeend', `
             <tr>
               <td><strong>${ev.title||''}</strong></td>
@@ -280,6 +308,7 @@
               <td>${fmtDate(ev.eventDate)}</td>
               <td>${ev.location||''}</td>
               <td>
+                <button class="btn-icon edit-btn" onclick="editEvent('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
                 <button class="btn-icon del" onclick="delDoc('Events','${d.id}','ev-msg', loadEvents)"><i class="fas fa-trash"></i></button>
               </td>
             </tr>`);
@@ -287,27 +316,69 @@
       } catch(e) { console.error(e); }
     }
  
+    window.editEvent = (id, dataStr) => {
+      const ev = JSON.parse(dataStr);
+      document.getElementById('ev-edit-id').value = id;
+      document.getElementById('ev-title').value = ev.title || '';
+      document.getElementById('ev-desc').value = ev.description || '';
+      document.getElementById('ev-type').value = ev.type || 'social';
+      document.getElementById('ev-time').value = ev.time || '';
+      document.getElementById('ev-location').value = ev.location || '';
+      if (ev.eventDate?.seconds) {
+        const d = new Date(ev.eventDate.seconds * 1000);
+        document.getElementById('ev-date').value = d.toISOString().split('T')[0];
+      }
+      const banner = document.getElementById('ev-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('ev-editing-label').textContent = 'Editing: ' + (ev.title || 'event');
+      document.getElementById('ev-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Event';
+      document.getElementById('ev-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('ev-cancel').style.display = '';
+      document.getElementById('ev-title').scrollIntoView({ behavior: 'smooth' });
+    };
+ 
+    document.getElementById('ev-cancel').addEventListener('click', () => {
+      resetForm(
+        ['ev-edit-id','ev-title','ev-desc','ev-time','ev-location','ev-date'],
+        'ev-edit-id',
+        document.getElementById('ev-editing-banner'),
+        document.getElementById('ev-form-title'),
+        document.getElementById('ev-save'),
+        document.getElementById('ev-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add New Event',
+        '<i class="fas fa-floppy-disk"></i> Save Event'
+      );
+    });
+ 
     document.getElementById('ev-save').addEventListener('click', async () => {
-      const title = document.getElementById('ev-title').value.trim();
-      const desc  = document.getElementById('ev-desc').value.trim();
-      const type  = document.getElementById('ev-type').value;
-      const dateV = document.getElementById('ev-date').value;
-      const time  = document.getElementById('ev-time').value.trim();
-      const loc   = document.getElementById('ev-location').value.trim();
+      const editId = document.getElementById('ev-edit-id').value;
+      const title  = document.getElementById('ev-title').value.trim();
+      const desc   = document.getElementById('ev-desc').value.trim();
+      const type   = document.getElementById('ev-type').value;
+      const dateV  = document.getElementById('ev-date').value;
+      const time   = document.getElementById('ev-time').value.trim();
+      const loc    = document.getElementById('ev-location').value.trim();
       if (!title || !desc || !dateV || !time || !loc) { msg('ev-msg','Please fill all required fields.','err'); return; }
       try {
-        await addDoc(collection(db, 'Events'), {
+        const data = {
           title, description: desc, type, time, location: loc,
           eventDate: Timestamp.fromDate(new Date(dateV + 'T00:00:00')),
-          createdBy: auth.currentUser?.uid || ''
-        });
-        msg('ev-msg', 'Event saved!', 'ok');
-        ['ev-title','ev-desc','ev-time','ev-location','ev-date'].forEach(id => document.getElementById(id).value = '');
+        };
+        if (editId) {
+          await updateDoc(doc(db, 'Events', editId), data);
+          msg('ev-msg', 'Event updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Events'), { ...data, createdBy: auth.currentUser?.uid || '' });
+          msg('ev-msg', 'Event saved!', 'ok');
+        }
+        document.getElementById('ev-cancel').click();
         loadEvents();
       } catch(e) { msg('ev-msg', 'Error: ' + e.message, 'err'); }
     });
  
+    // ══════════════════════════════════════════
     // ── JOB POSTINGS ──
+    // ══════════════════════════════════════════
     async function loadJobs() {
       const tbody = document.getElementById('job-tbody');
       try {
@@ -319,6 +390,7 @@
         snap.forEach(d => {
           const j = d.data();
           const isActive = j.isActive !== false;
+          const dataAttr = encodeURIComponent(JSON.stringify(j));
           tbody.insertAdjacentHTML('beforeend', `
             <tr>
               <td><strong>${j.title||''}</strong></td>
@@ -326,6 +398,7 @@
               <td><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
               <td>${fmtDate(j.datePosted)}</td>
               <td>
+                <button class="btn-icon edit-btn" onclick="editJob('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
                 <button class="btn-icon" onclick="toggleJob('${d.id}', ${isActive})"><i class="fas fa-${isActive ? 'eye-slash' : 'eye'}"></i></button>
                 <button class="btn-icon del" onclick="delDoc('Job Postings','${d.id}','job-msg', loadJobs)"><i class="fas fa-trash"></i></button>
               </td>
@@ -341,65 +414,143 @@
       } catch(e) { alert('Error: ' + e.message); }
     };
  
+    window.editJob = (id, dataStr) => {
+      const j = JSON.parse(dataStr);
+      document.getElementById('job-edit-id').value = id;
+      document.getElementById('job-title').value = j.title || '';
+      document.getElementById('job-company').value = j.company || '';
+      document.getElementById('job-desc').value = j.description || '';
+      document.getElementById('job-link').value = j.applicationLink || '';
+      const banner = document.getElementById('job-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('job-editing-label').textContent = 'Editing: ' + (j.title || 'job');
+      document.getElementById('job-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Job Posting';
+      document.getElementById('job-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('job-cancel').style.display = '';
+      document.getElementById('job-title').scrollIntoView({ behavior: 'smooth' });
+    };
+ 
+    document.getElementById('job-cancel').addEventListener('click', () => {
+      resetForm(
+        ['job-edit-id','job-title','job-company','job-desc','job-link'],
+        'job-edit-id',
+        document.getElementById('job-editing-banner'),
+        document.getElementById('job-form-title'),
+        document.getElementById('job-save'),
+        document.getElementById('job-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add Job Posting',
+        '<i class="fas fa-floppy-disk"></i> Post Job'
+      );
+    });
+ 
     document.getElementById('job-save').addEventListener('click', async () => {
+      const editId  = document.getElementById('job-edit-id').value;
       const title   = document.getElementById('job-title').value.trim();
       const company = document.getElementById('job-company').value.trim();
       const desc    = document.getElementById('job-desc').value.trim();
       const link    = document.getElementById('job-link').value.trim();
       if (!title || !company || !desc || !link) { msg('job-msg','Please fill all required fields.','err'); return; }
       try {
-        await addDoc(collection(db, 'Job Postings'), {
-          title, company, description: desc, applicationLink: link,
-          isActive: true, datePosted: serverTimestamp(),
-          createdBy: auth.currentUser?.uid || ''
-        });
-        msg('job-msg', 'Job posted!', 'ok');
-        ['job-title','job-company','job-desc','job-link'].forEach(id => document.getElementById(id).value = '');
+        const data = { title, company, description: desc, applicationLink: link };
+        if (editId) {
+          await updateDoc(doc(db, 'Job Postings', editId), data);
+          msg('job-msg', 'Job updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Job Postings'), { ...data, isActive: true, datePosted: serverTimestamp(), createdBy: auth.currentUser?.uid || '' });
+          msg('job-msg', 'Job posted!', 'ok');
+        }
+        document.getElementById('job-cancel').click();
         loadJobs();
       } catch(e) { msg('job-msg', 'Error: ' + e.message, 'err'); }
     });
  
+    // ══════════════════════════════════════════
     // ── EXEC BOARD ──
+    // ══════════════════════════════════════════
     async function loadBoard() {
       const tbody = document.getElementById('bd-tbody');
       try {
-        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('name', 'asc')));
+        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc')));
         document.getElementById('statBoard').textContent = snap.size;
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-users"></i> No board members yet.</td></tr>'; return; }
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-users"></i> No board members yet.</td></tr>'; return; }
         tbody.innerHTML = '';
         snap.forEach(d => {
           const m = d.data();
+          const dataAttr = encodeURIComponent(JSON.stringify(m));
           tbody.insertAdjacentHTML('beforeend', `
             <tr>
               <td><strong>${m.name||''}</strong></td>
               <td>${m.role||''}</td>
               <td>${m.year||''}</td>
-              <td><button class="btn-icon del" onclick="delDoc('Leadership','${d.id}','bd-msg', loadBoard)"><i class="fas fa-trash"></i></button></td>
+              <td style="text-align:center">${m.displayOrder ?? '—'}</td>
+              <td>
+                <button class="btn-icon edit-btn" onclick="editMember('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon del" onclick="delDoc('Leadership','${d.id}','bd-msg', loadBoard)"><i class="fas fa-trash"></i></button>
+              </td>
             </tr>`);
         });
       } catch(e) { console.error(e); }
     }
  
+    window.editMember = (id, dataStr) => {
+      const m = JSON.parse(dataStr);
+      document.getElementById('bd-edit-id').value = id;
+      document.getElementById('bd-name').value = m.name || '';
+      document.getElementById('bd-role').value = m.role || '';
+      document.getElementById('bd-year').value = m.year || '';
+      document.getElementById('bd-order').value = m.displayOrder || '';
+      document.getElementById('bd-photo').value = m.photoUrl || '';
+      document.getElementById('bd-linkedin').value = m.linkedinUrl || '';
+      document.getElementById('bd-email').value = m.email || '';
+      const banner = document.getElementById('bd-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('bd-editing-label').textContent = 'Editing: ' + (m.name || 'member');
+      document.getElementById('bd-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Board Member';
+      document.getElementById('bd-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('bd-cancel').style.display = '';
+      document.getElementById('bd-name').scrollIntoView({ behavior: 'smooth' });
+    };
+ 
+    document.getElementById('bd-cancel').addEventListener('click', () => {
+      resetForm(
+        ['bd-edit-id','bd-name','bd-role','bd-year','bd-order','bd-photo','bd-linkedin','bd-email'],
+        'bd-edit-id',
+        document.getElementById('bd-editing-banner'),
+        document.getElementById('bd-form-title'),
+        document.getElementById('bd-save'),
+        document.getElementById('bd-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add Board Member',
+        '<i class="fas fa-floppy-disk"></i> Add Member'
+      );
+    });
+ 
     document.getElementById('bd-save').addEventListener('click', async () => {
-      const name  = document.getElementById('bd-name').value.trim();
-      const role  = document.getElementById('bd-role').value.trim();
-      const year  = document.getElementById('bd-year').value.trim();
-      const photo = document.getElementById('bd-photo').value.trim();
+      const editId  = document.getElementById('bd-edit-id').value;
+      const name    = document.getElementById('bd-name').value.trim();
+      const role    = document.getElementById('bd-role').value.trim();
+      const year    = document.getElementById('bd-year').value.trim();
+      const order   = parseInt(document.getElementById('bd-order').value) || 99;
+      const photo   = document.getElementById('bd-photo').value.trim();
+      const linkedin = document.getElementById('bd-linkedin').value.trim();
+      const email   = document.getElementById('bd-email').value.trim();
       if (!name || !role) { msg('bd-msg','Name and role are required.','err'); return; }
       try {
-        await addDoc(collection(db, 'Leadership'), {
-        name, role, year, photoUrl: photo || '',
-        linkedinUrl: document.getElementById('bd-linkedin').value.trim() || '',
-        email: document.getElementById('bd-email').value.trim() || '',
-        createdBy: auth.currentUser?.uid || ''
-        });
-        msg('bd-msg', 'Member added!', 'ok');
-        ['bd-name','bd-role','bd-year','bd-photo','bd-linkedin','bd-email'].forEach(id => document.getElementById(id).value = '');
+        const data = { name, role, year, displayOrder: order, photoUrl: photo || '', linkedinUrl: linkedin || '', email: email || '' };
+        if (editId) {
+          await updateDoc(doc(db, 'Leadership', editId), data);
+          msg('bd-msg', 'Member updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Leadership'), { ...data, createdBy: auth.currentUser?.uid || '' });
+          msg('bd-msg', 'Member added!', 'ok');
+        }
+        document.getElementById('bd-cancel').click();
         loadBoard();
       } catch(e) { msg('bd-msg', 'Error: ' + e.message, 'err'); }
     });
  
+    // ══════════════════════════════════════════
     // ── ACHIEVEMENTS ──
+    // ══════════════════════════════════════════
     async function loadAchievements() {
       const tbody = document.getElementById('ach-tbody');
       try {
@@ -408,34 +559,72 @@
         tbody.innerHTML = '';
         snap.forEach(d => {
           const a = d.data();
+          const dataAttr = encodeURIComponent(JSON.stringify(a));
           tbody.insertAdjacentHTML('beforeend', `
             <tr>
               <td><strong>${a.title||''}</strong></td>
               <td>${a.year||''}</td>
               <td>${a.description||''}</td>
-              <td><button class="btn-icon del" onclick="delDoc('Achievements','${d.id}','ach-msg', loadAchievements)"><i class="fas fa-trash"></i></button></td>
+              <td>
+                <button class="btn-icon edit-btn" onclick="editAchievement('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon del" onclick="delDoc('Achievements','${d.id}','ach-msg', loadAchievements)"><i class="fas fa-trash"></i></button>
+              </td>
             </tr>`);
         });
       } catch(e) { console.error(e); }
     }
  
+    window.editAchievement = (id, dataStr) => {
+      const a = JSON.parse(dataStr);
+      document.getElementById('ach-edit-id').value = id;
+      document.getElementById('ach-title').value = a.title || '';
+      document.getElementById('ach-desc').value = a.description || '';
+      document.getElementById('ach-year').value = a.year || '';
+      const banner = document.getElementById('ach-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('ach-editing-label').textContent = 'Editing: ' + (a.title || 'achievement');
+      document.getElementById('ach-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Achievement';
+      document.getElementById('ach-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('ach-cancel').style.display = '';
+      document.getElementById('ach-title').scrollIntoView({ behavior: 'smooth' });
+    };
+ 
+    document.getElementById('ach-cancel').addEventListener('click', () => {
+      resetForm(
+        ['ach-edit-id','ach-title','ach-desc','ach-year'],
+        'ach-edit-id',
+        document.getElementById('ach-editing-banner'),
+        document.getElementById('ach-form-title'),
+        document.getElementById('ach-save'),
+        document.getElementById('ach-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add Achievement',
+        '<i class="fas fa-floppy-disk"></i> Save Achievement'
+      );
+    });
+ 
     document.getElementById('ach-save').addEventListener('click', async () => {
-      const title = document.getElementById('ach-title').value.trim();
-      const desc  = document.getElementById('ach-desc').value.trim();
-      const year  = parseInt(document.getElementById('ach-year').value);
+      const editId = document.getElementById('ach-edit-id').value;
+      const title  = document.getElementById('ach-title').value.trim();
+      const desc   = document.getElementById('ach-desc').value.trim();
+      const year   = parseInt(document.getElementById('ach-year').value);
       if (!title || !desc || !year) { msg('ach-msg','Please fill all required fields.','err'); return; }
       try {
-        await addDoc(collection(db, 'Achievements'), {
-          title, description: desc, year,
-          createdBy: auth.currentUser?.uid || ''
-        });
-        msg('ach-msg', 'Achievement saved!', 'ok');
-        ['ach-title','ach-desc','ach-year'].forEach(id => document.getElementById(id).value = '');
+        const data = { title, description: desc, year };
+        if (editId) {
+          await updateDoc(doc(db, 'Achievements', editId), data);
+          msg('ach-msg', 'Achievement updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Achievements'), { ...data, createdBy: auth.currentUser?.uid || '' });
+          msg('ach-msg', 'Achievement saved!', 'ok');
+        }
+        document.getElementById('ach-cancel').click();
         loadAchievements();
       } catch(e) { msg('ach-msg', 'Error: ' + e.message, 'err'); }
     });
  
-    // ── CONTACTS ──
+    // ══════════════════════════════════════════
+    // ── CONTACTS (read-only, delete only) ──
+    // ══════════════════════════════════════════
     async function loadContacts() {
       const tbody = document.getElementById('ct-tbody');
       try {
@@ -468,7 +657,6 @@
       } catch(e) { alert('Error: ' + e.message); }
     };
  
-    // Make reload functions globally accessible for onclick handlers
     window.loadEvents = loadEvents;
     window.loadJobs = loadJobs;
     window.loadBoard = loadBoard;
@@ -482,7 +670,5 @@
     loadAchievements();
     loadContacts();
   </script>
-  
 </body>
 </html>
-

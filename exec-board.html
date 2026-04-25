@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
- 
+
   <nav class="navbar" id="navbar">
     <div class="container nav-inner">
       <a href="index.html" class="nav-brand">
@@ -56,6 +56,7 @@
     </div>
   </section>
  
+
   <section class="cta-section">
     <div class="container reveal-scale">
       <h2>Interested in Leadership?</h2>
@@ -101,16 +102,16 @@
       </div>
     </div>
   </footer>
- 
+
   <script type="module">
     import { db } from './firebase-config.js';
     import { collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- 
     async function loadBoard() {
       const grid = document.getElementById('boardGrid');
       try {
-        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('name', 'asc')));
+        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc')));
         if (snap.empty) {
+ 
           grid.innerHTML = '<p style="color:var(--gray-500); text-align:center; grid-column:1/-1; padding:2rem;">No board members listed yet.</p>';
           return;
         }
@@ -120,6 +121,8 @@
           const photo = d.photoUrl
             ? `<img src="${d.photoUrl}" alt="${d.name}" width="400" height="400">`
             : `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(d.name)}&size=400&background=c5050c&color=ffffff&bold=true&rounded=true" alt="${d.name}" width="400" height="400">`;
+          const linkedinHref = d.linkedinUrl || 'https://www.linkedin.com/company/uw-madison-information-systems-society';
+          const emailHref = 'mailto:' + (d.email || 'iss@wisc.edu');
           grid.insertAdjacentHTML('beforeend', `
             <div class="member-card">
               <div class="member-photo">${photo}</div>
@@ -128,8 +131,8 @@
                 <div class="member-role">${d.role || ''}</div>
                 <p>${d.year || ''}</p>
                 <div class="member-socials">
-                  <a href="${d.linkedinUrl || 'https://www.linkedin.com/company/uw-madison-information-systems-society'}" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                  <a href="mailto:${d.email || 'iss@wisc.edu'}" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                  <a href="${linkedinHref}" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                  <a href="${emailHref}" aria-label="Email"><i class="fas fa-envelope"></i></a>
                 </div>
               </div>
             </div>`);
@@ -139,10 +142,8 @@
         grid.innerHTML = '<p style="color:var(--gray-500); text-align:center; grid-column:1/-1; padding:2rem;">Could not load board members. Please try again later.</p>';
       }
     }
- 
     loadBoard();
   </script>
- 
   <script>
     window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
@@ -156,6 +157,5 @@
     });
   </script>
   <script src="animations.js"></script>
-
 </body>
 </html>
