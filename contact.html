@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact &amp; Interest | ISS @ UW-Madison</title>
-  <link rel="icon" href="ISS logo.png" type="image/jpeg">
+  <link rel="icon" href="ISS logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
   <section class="page-hero">
     <div class="container">
       <h1>Contact &amp; <span>Interest</span></h1>
-      <p>Tell us how you would like to get involved. Submissions are logged in the browser for this milestone; Firestore integration will replace the placeholder save.</p>
+      <p>Tell us how you'd like to get involved. Submissions are saved directly to Firestore.</p>
     </div>
   </section>
  
@@ -46,30 +46,32 @@
       <div class="form-card reveal-up">
         <form id="interestForm" novalidate>
           <div class="form-row">
-            <label for="fullName">Name</label>
-            <input type="text" id="fullName" name="name" required autocomplete="name" placeholder="Your full name">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" required placeholder="First name">
+          </div>
+          <div class="form-row">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" required placeholder="Last name">
           </div>
           <div class="form-row">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@wisc.edu">
+            <input type="email" id="email" required autocomplete="email" placeholder="you@wisc.edu">
           </div>
           <div class="form-row">
             <label for="interest">Interest</label>
-            <select id="interest" name="interest" required>
+            <select id="interest" required>
               <option value="">Select one</option>
-              <option value="membership">Membership / joining ISS</option>
-              <option value="events">Events &amp; programming</option>
-              <option value="speaking">Speaking / company visit</option>
-              <option value="sponsorship">Sponsorship</option>
-              <option value="alumni">Alumni &amp; mentorship</option>
-              <option value="other">Other</option>
+              <option value="member">Membership / joining ISS</option>
+              <option value="sponsor">Sponsorship</option>
+              <option value="speaker">Speaking / company visit</option>
+              <option value="general">General inquiry</option>
             </select>
           </div>
           <div class="form-row">
             <label for="message">Message</label>
-            <textarea id="message" name="message" rows="5" required placeholder="What would you like us to know?"></textarea>
+            <textarea id="message" rows="5" required placeholder="What would you like us to know?"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;" id="submitBtn">
             <i class="fas fa-paper-plane"></i> Submit
           </button>
         </form>
@@ -87,35 +89,26 @@
           <div class="footer-social">
             <a href="https://www.instagram.com/iss_uwmadison/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.linkedin.com/company/uw-madison-information-systems-society" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="mailto: iss@iss.wisc.edu" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            <a href="mailto:iss@wisc.edu" aria-label="Email"><i class="fas fa-envelope"></i></a>
           </div>
         </div>
-        <div>
-          <h4>Pages</h4>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="events.html">Events</a></li>
-            <li><a href="exec-board.html">Exec Board</a></li>
-            <li><a href="careers.html">Careers</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li><a href="login.html">Login</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Resources</h4>
-          <ul>
-            <li><a href="https://win.wisc.edu/organization/iss" target="_blank">Join on WIN</a></li>
-            <li><a href="https://business.wisc.edu" target="_blank">Wisconsin School of Business</a></li>
-            <li><a href="careers.html">Job Board</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Contact</h4>
-          <ul>
-            <li><a href="mailto:iss@wisc.edu"><i class="fas fa-envelope" style="width:16px;"></i> iss@wisc.edu</a></li>
-            <li><i class="fas fa-map-marker-alt" style="width:16px;"></i> Grainger Hall, Madison WI</li>
-          </ul>
-        </div>
+        <div><h4>Pages</h4><ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="events.html">Events</a></li>
+          <li><a href="exec-board.html">Exec Board</a></li>
+          <li><a href="careers.html">Careers</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul></div>
+        <div><h4>Resources</h4><ul>
+          <li><a href="https://win.wisc.edu/organization/iss" target="_blank">Join on WIN</a></li>
+          <li><a href="https://business.wisc.edu" target="_blank">Wisconsin School of Business</a></li>
+          <li><a href="careers.html">Job Board</a></li>
+        </ul></div>
+        <div><h4>Contact</h4><ul>
+          <li><a href="mailto:iss@wisc.edu"><i class="fas fa-envelope" style="width:16px;"></i> iss@wisc.edu</a></li>
+          <li><i class="fas fa-map-marker-alt" style="width:16px;"></i> Grainger Hall, Madison WI</li>
+        </ul></div>
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 Information Systems Society &mdash; UW-Madison. All rights reserved.</p>
@@ -123,51 +116,53 @@
     </div>
   </footer>
  
-  <script>
-    window.addEventListener('scroll', function () {
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ 
+    window.addEventListener('scroll', () => {
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
     });
-    document.getElementById('hamburger').addEventListener('click', function () {
+    document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('open');
     });
-    document.querySelectorAll('.nav-links a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        document.getElementById('navLinks').classList.remove('open');
-      });
-    });
+    document.querySelectorAll('.nav-links a').forEach(l => l.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
  
-    document.getElementById('interestForm').addEventListener('submit', function (e) {
+    document.getElementById('interestForm').addEventListener('submit', async function (e) {
       e.preventDefault();
-      var status = document.getElementById('formStatus');
-      var name = document.getElementById('fullName').value.trim();
-      var email = document.getElementById('email').value.trim();
-      var interest = document.getElementById('interest').value;
-      var message = document.getElementById('message').value.trim();
-      if (!name || !email || !interest || !message) {
+      const status = document.getElementById('formStatus');
+      const btn = document.getElementById('submitBtn');
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName  = document.getElementById('lastName').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const interest  = document.getElementById('interest').value;
+      const message   = document.getElementById('message').value.trim();
+ 
+      if (!firstName || !lastName || !email || !interest || !message) {
         status.textContent = 'Please fill out every field.';
         status.className = 'form-status form-status-error';
         return;
       }
-      var payload = {
-        name: name,
-        email: email,
-        interest: interest,
-        message: message,
-        submittedAt: new Date().toISOString()
-      };
-      // Milestone: replace with Firestore, e.g. addDoc(collection(db, 'interestForms'), payload)
-      console.log('Firestore-ready payload:', payload);
+ 
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+ 
       try {
-        var key = 'issInterestDrafts';
-        var prev = JSON.parse(localStorage.getItem(key) || '[]');
-        prev.push(payload);
-        localStorage.setItem(key, JSON.stringify(prev));
+        await addDoc(collection(db, 'Contacts'), {
+          firstName, lastName, email, interest, message,
+          submittedAt: serverTimestamp()
+        });
+        status.textContent = 'Thanks! Your message has been received.';
+        status.className = 'form-status form-status-ok';
+        document.getElementById('interestForm').reset();
       } catch (err) {
-        console.warn('localStorage backup failed', err);
+        console.error(err);
+        status.textContent = 'Something went wrong. Please try again.';
+        status.className = 'form-status form-status-error';
       }
-      status.textContent = 'Thanks — we received your message. (Demo: data is also logged to the console for Firestore wiring.)';
-      status.className = 'form-status form-status-ok';
-      document.getElementById('interestForm').reset();
+ 
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
     });
   </script>
   <script src="animations.js"></script>

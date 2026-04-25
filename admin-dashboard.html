@@ -4,219 +4,485 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | ISS @ UW-Madison</title>
-  <link rel="icon" href="ISS logo.png" type="image/jpeg">
+  <link rel="icon" href="ISS logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Admin-only styles ── */
+    .admin-nav-bar { background: #1a1a1a; color: white; padding: 0.6rem 0; font-size: 0.82rem; }
+    .admin-nav-bar .container { display: flex; justify-content: space-between; align-items: center; }
+    .admin-nav-bar span { opacity: 0.7; }
+    .admin-nav-bar a { color: white; opacity: 0.7; margin-left: 1rem; }
+    .admin-nav-bar a:hover { opacity: 1; }
+ 
+    .admin-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0; }
+    .admin-tab { padding: 0.65rem 1.25rem; border-radius: 8px 8px 0 0; font-weight: 600; font-size: 0.88rem; cursor: pointer; border: none; background: transparent; color: var(--gray-500); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .admin-tab.active { color: var(--uw-red); border-bottom-color: var(--uw-red); background: rgba(197,5,12,0.04); }
+    .admin-tab:hover:not(.active) { color: var(--gray-900); background: var(--gray-100); }
+ 
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+ 
+    .admin-form { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.75rem; margin-bottom: 2rem; }
+    .admin-form h3 { font-size: 1rem; margin-bottom: 1.25rem; color: var(--gray-900); display: flex; align-items: center; gap: 0.5rem; }
+    .admin-form h3 i { color: var(--uw-red); }
+    .admin-field { margin-bottom: 1rem; }
+    .admin-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.3rem; }
+    .admin-field input, .admin-field textarea, .admin-field select { width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: 0.88rem; transition: border-color 0.2s; }
+    .admin-field input:focus, .admin-field textarea:focus, .admin-field select:focus { outline: none; border-color: var(--uw-red); }
+    .admin-field textarea { resize: vertical; min-height: 80px; }
+    .admin-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .admin-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .admin-form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .admin-msg { font-size: 0.82rem; padding: 0.5rem 0.85rem; border-radius: 7px; margin-top: 0.75rem; display: none; }
+    .admin-msg.ok { background: #dcfce7; color: #166534; display: block; }
+    .admin-msg.err { background: #fee2e2; color: #991b1b; display: block; }
+ 
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .admin-table th { background: var(--gray-100); padding: 0.6rem 1rem; text-align: left; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-200); }
+    .admin-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
+    .admin-table tr:hover td { background: #fafafa; }
+    .admin-table .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-active { background: #dcfce7; color: #166534; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .admin-table .btn-icon { background: none; border: none; cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 5px; font-size: 0.8rem; color: var(--gray-500); transition: all 0.2s; }
+    .admin-table .btn-icon:hover { background: var(--gray-100); color: var(--gray-900); }
+    .admin-table .btn-icon.del:hover { background: #fee2e2; color: #991b1b; }
+ 
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+    .stat-box { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .stat-box-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(197,5,12,0.08); color: var(--uw-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-box-info p { font-size: 0.78rem; color: var(--gray-500); margin: 0; }
+    .stat-box-info h3 { font-size: 1.6rem; font-weight: 700; margin: 0; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.4; }
+  </style>
 </head>
 <body>
  
-  <nav class="navbar" id="navbar">
-    <div class="container nav-inner">
-      <a href="index.html" class="nav-brand">
-        <img src="ISS logo.png" alt="ISS Logo">
-        <span>ISS</span> @ UW-Madison
-      </a>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="events.html">Events</a></li>
-        <li><a href="exec-board.html">Exec Board</a></li>
-        <li><a href="careers.html">Careers</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="login.html">Login</a></li>
-        <li><a href="https://win.wisc.edu/organization/iss" target="_blank" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Join ISS</a></li>
-      </ul>
-      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
-        <span></span><span></span><span></span>
-      </button>
+  <!-- Admin top bar -->
+  <div class="admin-nav-bar" id="adminBar">
+    <div class="container">
+      <span><i class="fas fa-shield-halved"></i> Admin Dashboard &mdash; <span id="adminEmail">loading...</span></span>
+      <div>
+        <a href="index.html"><i class="fas fa-globe"></i> View Site</a>
+        <a href="#" id="logoutLink"><i class="fas fa-right-from-bracket"></i> Log out</a>
+      </div>
     </div>
-  </nav>
+  </div>
  
-  <section class="page-hero admin-hero">
+  <!-- No regular navbar — admins don't need it -->
+  <section class="page-hero admin-hero" style="padding: 2.5rem 0;">
     <div class="container">
       <h1>Admin <span>Dashboard</span></h1>
-      <p>Manage events, achievements, and job postings. Data is stored in <code>localStorage</code> for this milestone; Firestore will back these lists next.</p>
-      <div class="admin-toolbar">
-        <span id="adminWelcome" class="admin-welcome"></span>
-        <button type="button" class="btn btn-outline" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Log out</button>
-      </div>
+      <p>Manage events, leadership, job postings, achievements, and contact submissions — all backed by Firestore.</p>
     </div>
   </section>
  
-  <section class="admin-section">
+  <section class="admin-section" style="padding-top: 1.5rem;">
     <div class="container">
-      <div class="dash-grid">
  
-        <div class="dash-card reveal-up">
-          <h2><i class="fas fa-calendar-days"></i> Events</h2>
-          <p class="dash-desc">Add a one-line event entry (title &mdash; date).</p>
-          <div class="dash-input-row">
-            <input type="text" id="eventInput" placeholder="e.g. Alumni panel &mdash; Feb 12">
-            <button type="button" class="btn btn-primary btn-sm" id="eventAdd">Add</button>
-          </div>
-          <ul class="dash-list" id="eventList"></ul>
-        </div>
- 
-        <div class="dash-card reveal-up">
-          <h2><i class="fas fa-trophy"></i> Achievements</h2>
-          <p class="dash-desc">Track chapter wins, competition placements, or member spotlights.</p>
-          <div class="dash-input-row">
-            <input type="text" id="achievementInput" placeholder="e.g. 1st place &mdash; case competition">
-            <button type="button" class="btn btn-primary btn-sm" id="achievementAdd">Add</button>
-          </div>
-          <ul class="dash-list" id="achievementList"></ul>
-        </div>
- 
-        <div class="dash-card reveal-up">
-          <h2><i class="fas fa-briefcase"></i> Job postings</h2>
-          <p class="dash-desc">Draft postings for the careers page (live board remains hardcoded until CMS/Firestore).</p>
-          <div class="dash-input-row">
-            <input type="text" id="jobInput" placeholder="e.g. Company &mdash; Role title">
-            <button type="button" class="btn btn-primary btn-sm" id="jobAdd">Add</button>
-          </div>
-          <ul class="dash-list" id="jobList"></ul>
-        </div>
- 
+      <!-- Stats row -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-calendar-days"></i></div><div class="stat-box-info"><p>Events</p><h3 id="statEvents">—</h3></div></div>
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-briefcase"></i></div><div class="stat-box-info"><p>Active Jobs</p><h3 id="statJobs">—</h3></div></div>
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-users"></i></div><div class="stat-box-info"><p>Board Members</p><h3 id="statBoard">—</h3></div></div>
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-envelope"></i></div><div class="stat-box-info"><p>Contact Submissions</p><h3 id="statContacts">—</h3></div></div>
       </div>
+ 
+      <!-- Tab nav -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="events"><i class="fas fa-calendar-days"></i> Events</button>
+        <button class="admin-tab" data-tab="jobs"><i class="fas fa-briefcase"></i> Job Postings</button>
+        <button class="admin-tab" data-tab="board"><i class="fas fa-users"></i> Exec Board</button>
+        <button class="admin-tab" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button>
+        <button class="admin-tab" data-tab="contacts"><i class="fas fa-envelope"></i> Contact Submissions</button>
+      </div>
+ 
+      <!-- ── EVENTS PANEL ── -->
+      <div class="admin-panel active" id="panel-events">
+        <div class="admin-form">
+          <h3><i class="fas fa-plus-circle"></i> Add New Event</h3>
+          <div class="admin-field"><label>Title *</label><input type="text" id="ev-title" placeholder="Alumni Panel: Tech Consulting"></div>
+          <div class="admin-field"><label>Description *</label><textarea id="ev-desc" placeholder="Short description of the event..."></textarea></div>
+          <div class="admin-row-3">
+            <div class="admin-field"><label>Type *</label>
+              <select id="ev-type">
+                <option value="social">Social</option>
+                <option value="alumni">Alumni Panel</option>
+                <option value="company">Company Visit</option>
+                <option value="workshop">Workshop</option>
+              </select>
+            </div>
+            <div class="admin-field"><label>Date *</label><input type="date" id="ev-date"></div>
+            <div class="admin-field"><label>Time *</label><input type="text" id="ev-time" placeholder="e.g. 6:00 PM"></div>
+          </div>
+          <div class="admin-field"><label>Location *</label><input type="text" id="ev-location" placeholder="Grainger Hall 1120"></div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="ev-save"><i class="fas fa-floppy-disk"></i> Save Event</button>
+          </div>
+          <p class="admin-msg" id="ev-msg"></p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Actions</th></tr></thead>
+            <tbody id="ev-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <!-- ── JOB POSTINGS PANEL ── -->
+      <div class="admin-panel" id="panel-jobs">
+        <div class="admin-form">
+          <h3><i class="fas fa-plus-circle"></i> Add Job Posting</h3>
+          <div class="admin-row-2">
+            <div class="admin-field"><label>Job Title *</label><input type="text" id="job-title" placeholder="Software Engineer Intern"></div>
+            <div class="admin-field"><label>Company *</label><input type="text" id="job-company" placeholder="Epic Systems"></div>
+          </div>
+          <div class="admin-field"><label>Description *</label><textarea id="job-desc" placeholder="Brief job description..."></textarea></div>
+          <div class="admin-field"><label>Application Link *</label><input type="url" id="job-link" placeholder="https://..."></div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="job-save"><i class="fas fa-floppy-disk"></i> Post Job</button>
+          </div>
+          <p class="admin-msg" id="job-msg"></p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+            <tbody id="job-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <!-- ── EXEC BOARD PANEL ── -->
+      <div class="admin-panel" id="panel-board">
+        <div class="admin-form">
+          <h3><i class="fas fa-plus-circle"></i> Add Board Member</h3>
+          <div class="admin-row-2">
+            <div class="admin-field"><label>Full Name *</label><input type="text" id="bd-name" placeholder="Jane Smith"></div>
+            <div class="admin-field"><label>Role / Title *</label><input type="text" id="bd-role" placeholder="VP of Events"></div>
+          </div>
+          <div class="admin-row-2">
+          <div class="admin-field"><label>Year</label><input type="text" id="bd-year" placeholder="e.g. Senior or 2025-2026"></div>
+          <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="bd-photo" placeholder="https://..."></div>
+          </div>
+          <div class="admin-row-2">
+          <div class="admin-field"><label>LinkedIn URL (optional)</label><input type="url" id="bd-linkedin" placeholder="https://linkedin.com/in/..."></div>
+          <div class="admin-field"><label>Email (optional)</label><input type="email" id="bd-email" placeholder="you@wisc.edu"></div>
+          </div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="bd-save"><i class="fas fa-floppy-disk"></i> Add Member</button>
+          </div>
+          <p class="admin-msg" id="bd-msg"></p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Year</th><th>Actions</th></tr></thead>
+            <tbody id="bd-tbody"><tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <!-- ── ACHIEVEMENTS PANEL ── -->
+      <div class="admin-panel" id="panel-achievements">
+        <div class="admin-form">
+          <h3><i class="fas fa-plus-circle"></i> Add Achievement</h3>
+          <div class="admin-field"><label>Title *</label><input type="text" id="ach-title" placeholder="1st Place — Case Competition"></div>
+          <div class="admin-field"><label>Description *</label><textarea id="ach-desc" placeholder="Brief description..."></textarea></div>
+          <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="ach-save"><i class="fas fa-floppy-disk"></i> Save Achievement</button>
+          </div>
+          <p class="admin-msg" id="ach-msg"></p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead>
+            <tbody id="ach-tbody"><tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <!-- ── CONTACTS PANEL ── -->
+      <div class="admin-panel" id="panel-contacts">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Interest</th><th>Message</th><th>Submitted</th><th>Actions</th></tr></thead>
+            <tbody id="ct-tbody"><tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+ 
     </div>
   </section>
  
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <img src="ISS logo.png" alt="ISS Logo">
-          <p>Information Systems Society at the University of Wisconsin-Madison. Connecting students to the world of business technology.</p>
-          <div class="footer-social">
-            <a href="https://www.instagram.com/iss_uwmadison/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.linkedin.com/company/uw-madison-information-systems-society" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="mailto: iss@iss.wisc.edu" aria-label="Email"><i class="fas fa-envelope"></i></a>
-          </div>
-        </div>
-        <div>
-          <h4>Pages</h4>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="events.html">Events</a></li>
-            <li><a href="exec-board.html">Exec Board</a></li>
-            <li><a href="careers.html">Careers</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li><a href="login.html">Login</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Resources</h4>
-          <ul>
-            <li><a href="https://win.wisc.edu/organization/iss" target="_blank">Join on WIN</a></li>
-            <li><a href="https://business.wisc.edu" target="_blank">Wisconsin School of Business</a></li>
-            <li><a href="careers.html">Job Board</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Contact</h4>
-          <ul>
-            <li><a href="mailto:iss@wisc.edu"><i class="fas fa-envelope" style="width:16px;"></i> iss@wisc.edu</a></li>
-            <li><i class="fas fa-map-marker-alt" style="width:16px;"></i> Grainger Hall, Madison WI</li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 Information Systems Society &mdash; UW-Madison. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut } from './firebase-config.js';
+    import {
+      collection, addDoc, getDocs, deleteDoc, updateDoc,
+      doc, serverTimestamp, query, orderBy, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
  
-  <script src="auth.js"></script>
-  <script>
-    (function () {
-    var session = issAuth.get();
-    if (!session || session.role !== 'admin') {
-      location.href = 'login.html?next=' + encodeURIComponent('admin-dashboard.html');
-      return;
-    }
-    document.getElementById('adminWelcome').textContent = 'Signed in as ' + (session && session.email ? session.email : 'admin');
+    // ── Auth guard ──
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { location.href = 'login.html?next=admin-dashboard.html'; return; }
+      document.getElementById('adminEmail').textContent = user.email;
+    });
  
-    function listKey(name) {
-      return 'issAdmin_' + name;
-    }
- 
-    function loadList(key) {
-      try {
-        return JSON.parse(localStorage.getItem(listKey(key)) || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
- 
-    function saveList(key, arr) {
-      localStorage.setItem(listKey(key), JSON.stringify(arr));
-    }
- 
-    function render(key, ulId) {
-      var ul = document.getElementById(ulId);
-      var items = loadList(key);
-      ul.innerHTML = '';
-      items.forEach(function (text, i) {
-        var li = document.createElement('li');
-        var span = document.createElement('span');
-        span.className = 'dash-li-text';
-        span.textContent = text;
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'dash-remove';
-        btn.setAttribute('aria-label', 'Remove');
-        btn.textContent = '\u00d7';
-        btn.addEventListener('click', function () {
-          var cur = loadList(key);
-          cur.splice(i, 1);
-          saveList(key, cur);
-          render(key, ulId);
-        });
-        li.appendChild(span);
-        li.appendChild(btn);
-        ul.appendChild(li);
-      });
-    }
- 
-    function wireAdd(inputId, buttonId, key, listId) {
-      document.getElementById(buttonId).addEventListener('click', function () {
-        var v = document.getElementById(inputId).value.trim();
-        if (!v) return;
-        var items = loadList(key);
-        items.push(v);
-        saveList(key, items);
-        document.getElementById(inputId).value = '';
-        render(key, listId);
-      });
-    }
- 
-    render('events', 'eventList');
-    render('achievements', 'achievementList');
-    render('jobs', 'jobList');
-    wireAdd('eventInput', 'eventAdd', 'events', 'eventList');
-    wireAdd('achievementInput', 'achievementAdd', 'achievements', 'achievementList');
-    wireAdd('jobInput', 'jobAdd', 'jobs', 'jobList');
- 
-    document.getElementById('logoutBtn').addEventListener('click', function () {
-      issAuth.clear();
+    document.getElementById('logoutLink').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
       location.href = 'login.html';
     });
  
-    window.addEventListener('scroll', function () {
-      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-    });
-    document.getElementById('hamburger').addEventListener('click', function () {
-      document.getElementById('navLinks').classList.toggle('open');
-    });
-    document.querySelectorAll('.nav-links a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        document.getElementById('navLinks').classList.remove('open');
+    // ── Tab switching ──
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
       });
     });
-    })();
+ 
+    // ── Helpers ──
+    function msg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'admin-msg ' + type;
+      setTimeout(() => el.className = 'admin-msg', 4000);
+    }
+ 
+    function fmtDate(ts) {
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+ 
+    // ── EVENTS ──
+    async function loadEvents() {
+      const tbody = document.getElementById('ev-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Events'), orderBy('eventDate', 'asc')));
+        document.getElementById('statEvents').textContent = snap.size;
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-calendar-xmark"></i> No events yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const ev = d.data();
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${ev.title||''}</strong></td>
+              <td>${ev.type||''}</td>
+              <td>${fmtDate(ev.eventDate)}</td>
+              <td>${ev.location||''}</td>
+              <td>
+                <button class="btn-icon del" onclick="delDoc('Events','${d.id}','ev-msg', loadEvents)"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+ 
+    document.getElementById('ev-save').addEventListener('click', async () => {
+      const title = document.getElementById('ev-title').value.trim();
+      const desc  = document.getElementById('ev-desc').value.trim();
+      const type  = document.getElementById('ev-type').value;
+      const dateV = document.getElementById('ev-date').value;
+      const time  = document.getElementById('ev-time').value.trim();
+      const loc   = document.getElementById('ev-location').value.trim();
+      if (!title || !desc || !dateV || !time || !loc) { msg('ev-msg','Please fill all required fields.','err'); return; }
+      try {
+        await addDoc(collection(db, 'Events'), {
+          title, description: desc, type, time, location: loc,
+          eventDate: Timestamp.fromDate(new Date(dateV + 'T00:00:00')),
+          createdBy: auth.currentUser?.uid || ''
+        });
+        msg('ev-msg', 'Event saved!', 'ok');
+        ['ev-title','ev-desc','ev-time','ev-location','ev-date'].forEach(id => document.getElementById(id).value = '');
+        loadEvents();
+      } catch(e) { msg('ev-msg', 'Error: ' + e.message, 'err'); }
+    });
+ 
+    // ── JOB POSTINGS ──
+    async function loadJobs() {
+      const tbody = document.getElementById('job-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Job Postings'), orderBy('datePosted', 'desc')));
+        const active = snap.docs.filter(d => d.data().isActive !== false).length;
+        document.getElementById('statJobs').textContent = active;
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-briefcase"></i> No job postings yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const j = d.data();
+          const isActive = j.isActive !== false;
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${j.title||''}</strong></td>
+              <td>${j.company||''}</td>
+              <td><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+              <td>${fmtDate(j.datePosted)}</td>
+              <td>
+                <button class="btn-icon" onclick="toggleJob('${d.id}', ${isActive})"><i class="fas fa-${isActive ? 'eye-slash' : 'eye'}"></i></button>
+                <button class="btn-icon del" onclick="delDoc('Job Postings','${d.id}','job-msg', loadJobs)"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+ 
+    window.toggleJob = async (id, current) => {
+      try {
+        await updateDoc(doc(db, 'Job Postings', id), { isActive: !current });
+        loadJobs();
+      } catch(e) { alert('Error: ' + e.message); }
+    };
+ 
+    document.getElementById('job-save').addEventListener('click', async () => {
+      const title   = document.getElementById('job-title').value.trim();
+      const company = document.getElementById('job-company').value.trim();
+      const desc    = document.getElementById('job-desc').value.trim();
+      const link    = document.getElementById('job-link').value.trim();
+      if (!title || !company || !desc || !link) { msg('job-msg','Please fill all required fields.','err'); return; }
+      try {
+        await addDoc(collection(db, 'Job Postings'), {
+          title, company, description: desc, applicationLink: link,
+          isActive: true, datePosted: serverTimestamp(),
+          createdBy: auth.currentUser?.uid || ''
+        });
+        msg('job-msg', 'Job posted!', 'ok');
+        ['job-title','job-company','job-desc','job-link'].forEach(id => document.getElementById(id).value = '');
+        loadJobs();
+      } catch(e) { msg('job-msg', 'Error: ' + e.message, 'err'); }
+    });
+ 
+    // ── EXEC BOARD ──
+    async function loadBoard() {
+      const tbody = document.getElementById('bd-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('name', 'asc')));
+        document.getElementById('statBoard').textContent = snap.size;
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-users"></i> No board members yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const m = d.data();
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${m.name||''}</strong></td>
+              <td>${m.role||''}</td>
+              <td>${m.year||''}</td>
+              <td><button class="btn-icon del" onclick="delDoc('Leadership','${d.id}','bd-msg', loadBoard)"><i class="fas fa-trash"></i></button></td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+ 
+    document.getElementById('bd-save').addEventListener('click', async () => {
+      const name  = document.getElementById('bd-name').value.trim();
+      const role  = document.getElementById('bd-role').value.trim();
+      const year  = document.getElementById('bd-year').value.trim();
+      const photo = document.getElementById('bd-photo').value.trim();
+      if (!name || !role) { msg('bd-msg','Name and role are required.','err'); return; }
+      try {
+        await addDoc(collection(db, 'Leadership'), {
+        name, role, year, photoUrl: photo || '',
+        linkedinUrl: document.getElementById('bd-linkedin').value.trim() || '',
+        email: document.getElementById('bd-email').value.trim() || '',
+        createdBy: auth.currentUser?.uid || ''
+        });
+        msg('bd-msg', 'Member added!', 'ok');
+        ['bd-name','bd-role','bd-year','bd-photo','bd-linkedin','bd-email'].forEach(id => document.getElementById(id).value = '');
+        loadBoard();
+      } catch(e) { msg('bd-msg', 'Error: ' + e.message, 'err'); }
+    });
+ 
+    // ── ACHIEVEMENTS ──
+    async function loadAchievements() {
+      const tbody = document.getElementById('ach-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Achievements'), orderBy('year', 'desc')));
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-trophy"></i> No achievements yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const a = d.data();
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${a.title||''}</strong></td>
+              <td>${a.year||''}</td>
+              <td>${a.description||''}</td>
+              <td><button class="btn-icon del" onclick="delDoc('Achievements','${d.id}','ach-msg', loadAchievements)"><i class="fas fa-trash"></i></button></td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+ 
+    document.getElementById('ach-save').addEventListener('click', async () => {
+      const title = document.getElementById('ach-title').value.trim();
+      const desc  = document.getElementById('ach-desc').value.trim();
+      const year  = parseInt(document.getElementById('ach-year').value);
+      if (!title || !desc || !year) { msg('ach-msg','Please fill all required fields.','err'); return; }
+      try {
+        await addDoc(collection(db, 'Achievements'), {
+          title, description: desc, year,
+          createdBy: auth.currentUser?.uid || ''
+        });
+        msg('ach-msg', 'Achievement saved!', 'ok');
+        ['ach-title','ach-desc','ach-year'].forEach(id => document.getElementById(id).value = '');
+        loadAchievements();
+      } catch(e) { msg('ach-msg', 'Error: ' + e.message, 'err'); }
+    });
+ 
+    // ── CONTACTS ──
+    async function loadContacts() {
+      const tbody = document.getElementById('ct-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Contacts'), orderBy('submittedAt', 'desc')));
+        document.getElementById('statContacts').textContent = snap.size;
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i> No submissions yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const c = d.data();
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${c.firstName||''} ${c.lastName||''}</strong></td>
+              <td><a href="mailto:${c.email||''}">${c.email||''}</a></td>
+              <td>${c.interest||''}</td>
+              <td style="max-width:260px; white-space:pre-wrap;">${c.message||''}</td>
+              <td>${fmtDate(c.submittedAt)}</td>
+              <td><button class="btn-icon del" onclick="delDoc('Contacts','${d.id}','', loadContacts)"><i class="fas fa-trash"></i></button></td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+ 
+    // ── Shared delete ──
+    window.delDoc = async (col, id, msgId, reloadFn) => {
+      if (!confirm('Delete this record? This cannot be undone.')) return;
+      try {
+        await deleteDoc(doc(db, col, id));
+        if (msgId) msg(msgId, 'Deleted.', 'ok');
+        reloadFn();
+      } catch(e) { alert('Error: ' + e.message); }
+    };
+ 
+    // Make reload functions globally accessible for onclick handlers
+    window.loadEvents = loadEvents;
+    window.loadJobs = loadJobs;
+    window.loadBoard = loadBoard;
+    window.loadAchievements = loadAchievements;
+    window.loadContacts = loadContacts;
+ 
+    // ── Initial load ──
+    loadEvents();
+    loadJobs();
+    loadBoard();
+    loadAchievements();
+    loadContacts();
   </script>
-  <script src="animations.js"></script>
+  
 </body>
 </html>
+
