@@ -60,7 +60,6 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="about.html" class="active">About</a></li>
         <li><a href="events.html">Events</a></li>
-        <li><a href="exec-board.html">Leadership</a></li>
         <li><a href="careers.html">Careers</a></li>
         <li><a href="contact.html">Contact Us</a></li>
         <li><a href="login.html">Login</a></li>
@@ -163,17 +162,13 @@
         <h2>Meet the Team</h2>
         <p class="section-subtitle">The 2025&ndash;2026 exec board keeping ISS running</p>
       </div>
-      <div class="team-teaser" id="teamTeaser">
+      <div class="grid-4" id="teamTeaser">
         <div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--gray-500);">
           <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; display:block; margin-bottom:0.75rem;"></i>
           Loading...
         </div>
       </div>
-      <div style="text-align:center; margin-top:2rem;">
-        <a href="exec-board.html" class="btn btn-outline">
-          <i class="fas fa-users"></i> View Full Exec Board
-        </a>
-      </div>
+
     </div>
   </section>
 
@@ -203,7 +198,7 @@
         </div>
         <div><h4>Pages</h4><ul>
           <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li>
-          <li><a href="events.html">Events</a></li><li><a href="exec-board.html">Leadership</a></li>
+          <li><a href="events.html">Events</a></li>
           <li><a href="careers.html">Careers</a></li><li><a href="contact.html">Contact</a></li>
           <li><a href="login.html">Login</a></li>
         </ul></div>
@@ -285,26 +280,35 @@
       } catch(e) { console.error(e); grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--gray-500);">Could not load testimonials.</p>'; }
     }
 
-    // ── Team teaser (first 4 members) ──
+    // ── Full board ──
     async function loadTeamTeaser() {
       const grid = document.getElementById('teamTeaser');
       try {
         const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc')));
-        if (snap.empty) { grid.innerHTML = ''; return; }
-        const members = snap.docs.slice(0, 4);
+        if (snap.empty) {
+          grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--gray-500);">No board members listed yet.</p>';
+          return;
+        }
         grid.innerHTML = '';
-        members.forEach(d => {
+        snap.forEach(d => {
           const m = d.data();
-          const initials = (m.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const photo = m.photoUrl
+            ? `<img src="${m.photoUrl}" alt="${m.name}" width="400" height="400">`
+            : `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&size=400&background=c5050c&color=ffffff&bold=true&rounded=true" alt="${m.name}" width="400" height="400">`;
+          const linkedinHref = m.linkedinUrl || 'https://www.linkedin.com/company/uw-madison-information-systems-society';
+          const emailHref = 'mailto:' + (m.email || 'iss@wisc.edu');
           grid.insertAdjacentHTML('beforeend', `
-            <div class="team-teaser-card">
-              <div class="team-teaser-avatar">
-                ${m.photoUrl
-                  ? `<img src="${m.photoUrl}" alt="${m.name}">`
-                  : initials}
+            <div class="member-card">
+              <div class="member-photo">${photo}</div>
+              <div class="member-info">
+                <h3>${m.name || ''}</h3>
+                <div class="member-role">${m.role || ''}</div>
+                <p>${m.year || ''}</p>
+                <div class="member-socials">
+                  <a href="${linkedinHref}" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                  <a href="${emailHref}" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                </div>
               </div>
-              <div class="team-teaser-name">${m.name || ''}</div>
-              <div class="team-teaser-role">${m.role || ''}</div>
             </div>`);
         });
       } catch(e) { console.error(e); }
