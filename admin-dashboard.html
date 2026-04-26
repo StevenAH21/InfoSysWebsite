@@ -1,674 +1,616 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | ISS @ UW-Madison</title>
-  <link rel="icon" href="ISS logo.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .admin-nav-bar { background: #1a1a1a; color: white; padding: 0.6rem 0; font-size: 0.82rem; }
-    .admin-nav-bar .container { display: flex; justify-content: space-between; align-items: center; }
-    .admin-nav-bar span { opacity: 0.7; }
-    .admin-nav-bar a { color: white; opacity: 0.7; margin-left: 1rem; }
-    .admin-nav-bar a:hover { opacity: 1; }
- 
-    .admin-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0; }
-    .admin-tab { padding: 0.65rem 1.25rem; border-radius: 8px 8px 0 0; font-weight: 600; font-size: 0.88rem; cursor: pointer; border: none; background: transparent; color: var(--gray-500); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
-    .admin-tab.active { color: var(--uw-red); border-bottom-color: var(--uw-red); background: rgba(197,5,12,0.04); }
-    .admin-tab:hover:not(.active) { color: var(--gray-900); background: var(--gray-100); }
- 
-    .admin-panel { display: none; }
-    .admin-panel.active { display: block; }
- 
-    .admin-form { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.75rem; margin-bottom: 2rem; }
-    .admin-form h3 { font-size: 1rem; margin-bottom: 1.25rem; color: var(--gray-900); display: flex; align-items: center; gap: 0.5rem; }
-    .admin-form h3 i { color: var(--uw-red); }
-    .admin-field { margin-bottom: 1rem; }
-    .admin-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.3rem; }
-    .admin-field input, .admin-field textarea, .admin-field select { width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: 0.88rem; transition: border-color 0.2s; }
-    .admin-field input:focus, .admin-field textarea:focus, .admin-field select:focus { outline: none; border-color: var(--uw-red); }
-    .admin-field textarea { resize: vertical; min-height: 80px; }
-    .admin-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .admin-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-    .admin-form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
-    .admin-msg { font-size: 0.82rem; padding: 0.5rem 0.85rem; border-radius: 7px; margin-top: 0.75rem; display: none; }
-    .admin-msg.ok { background: #dcfce7; color: #166534; display: block; }
-    .admin-msg.err { background: #fee2e2; color: #991b1b; display: block; }
- 
-    .admin-table-wrap { overflow-x: auto; }
-    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .admin-table th { background: var(--gray-100); padding: 0.6rem 1rem; text-align: left; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-200); }
-    .admin-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
-    .admin-table tr:hover td { background: #fafafa; }
-    .admin-table .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
-    .badge-active { background: #dcfce7; color: #166534; }
-    .badge-inactive { background: #fee2e2; color: #991b1b; }
-    .admin-table .btn-icon { background: none; border: none; cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 5px; font-size: 0.8rem; color: var(--gray-500); transition: all 0.2s; }
-    .admin-table .btn-icon:hover { background: var(--gray-100); color: var(--gray-900); }
-    .admin-table .btn-icon.del:hover { background: #fee2e2; color: #991b1b; }
-    .admin-table .btn-icon.edit-btn:hover { background: #dbeafe; color: #1d4ed8; }
- 
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
-    .stat-box { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
-    .stat-box-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(197,5,12,0.08); color: var(--uw-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-    .stat-box-info p { font-size: 0.78rem; color: var(--gray-500); margin: 0; }
-    .stat-box-info h3 { font-size: 1.6rem; font-weight: 700; margin: 0; }
-    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
-    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.4; }
- 
-    .btn-cancel { background: var(--gray-100); color: var(--gray-700); border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; }
-    .btn-cancel:hover { background: var(--gray-200); }
-    .editing-banner { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #1d4ed8; display: none; }
-    .editing-banner.active { display: flex; align-items: center; gap: 0.5rem; }
-  </style>
-</head>
-<body>
- 
-  <div class="admin-nav-bar" id="adminBar">
-    <div class="container">
-      <span><i class="fas fa-shield-halved"></i> Admin Dashboard &mdash; <span id="adminEmail">loading...</span></span>
-      <div>
-        <a href="index.html"><i class="fas fa-globe"></i> View Site</a>
-        <a href="#" id="logoutLink"><i class="fas fa-right-from-bracket"></i> Log out</a>
-      </div>
-    </div>
-  </div>
- 
-  <section class="page-hero admin-hero" style="padding: 2.5rem 0;">
-    <div class="container">
-      <h1>Admin <span>Dashboard</span></h1>
-      <p>Manage events, leadership, job postings, achievements, and contact submissions — all backed by Firestore.</p>
-    </div>
-  </section>
- 
-  <section class="admin-section" style="padding-top: 1.5rem;">
-    <div class="container">
- 
-      <!-- Stats row -->
-      <div class="stats-row" id="statsRow">
-        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-calendar-days"></i></div><div class="stat-box-info"><p>Events</p><h3 id="statEvents">—</h3></div></div>
-        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-briefcase"></i></div><div class="stat-box-info"><p>Active Jobs</p><h3 id="statJobs">—</h3></div></div>
-        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-users"></i></div><div class="stat-box-info"><p>Board Members</p><h3 id="statBoard">—</h3></div></div>
-        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-envelope"></i></div><div class="stat-box-info"><p>Contact Submissions</p><h3 id="statContacts">—</h3></div></div>
-      </div>
- 
-      <!-- Tab nav -->
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="events"><i class="fas fa-calendar-days"></i> Events</button>
-        <button class="admin-tab" data-tab="jobs"><i class="fas fa-briefcase"></i> Job Postings</button>
-        <button class="admin-tab" data-tab="board"><i class="fas fa-users"></i> Exec Board</button>
-        <button class="admin-tab" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button>
-        <button class="admin-tab" data-tab="contacts"><i class="fas fa-envelope"></i> Contact Submissions</button>
-      </div>
- 
-      <!-- ── EVENTS PANEL ── -->
-      <div class="admin-panel active" id="panel-events">
-        <div class="admin-form">
-          <div class="editing-banner" id="ev-editing-banner"><i class="fas fa-pen"></i> <span id="ev-editing-label">Editing event</span></div>
-          <h3 id="ev-form-title"><i class="fas fa-plus-circle"></i> Add New Event</h3>
-          <input type="hidden" id="ev-edit-id">
-          <div class="admin-field"><label>Title *</label><input type="text" id="ev-title" placeholder="Alumni Panel: Tech Consulting"></div>
-          <div class="admin-field"><label>Description *</label><textarea id="ev-desc" placeholder="Short description of the event..."></textarea></div>
-          <div class="admin-row-3">
-            <div class="admin-field"><label>Type *</label>
-              <select id="ev-type">
-                <option value="social">Social</option>
-                <option value="alumni">Alumni Panel</option>
-                <option value="company">Company Visit</option>
-                <option value="workshop">Workshop</option>
-              </select>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Admin Dashboard | ISS @ UW-Madison</title> 
+  <link rel="icon" href="ISS logo.png" type="image/png"> 
+  <link rel="preconnect" href="https://fonts.googleapis.com"> 
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> 
+  <link rel="stylesheet" href="styles.css"> 
+  <style> 
+    .admin-nav-bar { background: #1a1a1a; color: white; padding: 0.6rem 0; font-size: 0.82rem; } 
+    .admin-nav-bar .container { display: flex; justify-content: space-between; align-items: center; } 
+    .admin-nav-bar span { opacity: 0.7; } 
+    .admin-nav-bar a { color: white; opacity: 0.7; margin-left: 1rem; } 
+    .admin-nav-bar a:hover { opacity: 1; } 
+  
+    .admin-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0; } 
+    .admin-tab { padding: 0.65rem 1.25rem; border-radius: 8px 8px 0 0; font-weight: 600; font-size: 0.88rem; cursor: pointer; border: none; background: transparent; color: var(--gray-500); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; } 
+    .admin-tab.active { color: var(--uw-red); border-bottom-color: var(--uw-red); background: rgba(197,5,12,0.04); } 
+    .admin-tab:hover:not(.active) { color: var(--gray-900); background: var(--gray-100); } 
+  
+    .admin-panel { display: none; } 
+    .admin-panel.active { display: block; } 
+  
+    .admin-form { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.75rem; margin-bottom: 2rem; } 
+    .admin-form h3 { font-size: 1rem; margin-bottom: 1.25rem; color: var(--gray-900); display: flex; align-items: center; gap: 0.5rem; } 
+    .admin-form h3 i { color: var(--uw-red); } 
+    .admin-field { margin-bottom: 1rem; } 
+    .admin-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.3rem; } 
+    .admin-field input, .admin-field textarea, .admin-field select { width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: 0.88rem; transition: border-color 0.2s; } 
+    .admin-field input:focus, .admin-field textarea:focus, .admin-field select:focus { outline: none; border-color: var(--uw-red); } 
+    .admin-field textarea { resize: vertical; min-height: 80px; } 
+    .admin-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; } 
+    .admin-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; } 
+    .admin-form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; } 
+    .admin-msg { font-size: 0.82rem; padding: 0.5rem 0.85rem; border-radius: 7px; margin-top: 0.75rem; display: none; } 
+    .admin-msg.ok { background: #dcfce7; color: #166534; display: block; } 
+    .admin-msg.err { background: #fee2e2; color: #991b1b; display: block; } 
+  
+    .admin-table-wrap { overflow-x: auto; } 
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; } 
+    .admin-table th { background: var(--gray-100); padding: 0.6rem 1rem; text-align: left; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-200); } 
+    .admin-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-200); vertical-align: top; } 
+    .admin-table tr:hover td { background: #fafafa; } 
+    .admin-table .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; } 
+    .badge-active { background: #dcfce7; color: #166534; } 
+    .badge-inactive { background: #fee2e2; color: #991b1b; } 
+    .admin-table .btn-icon { background: none; border: none; cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 5px; font-size: 0.8rem; color: var(--gray-500); transition: all 0.2s; } 
+    .admin-table .btn-icon:hover { background: var(--gray-100); color: var(--gray-900); } 
+    .admin-table .btn-icon.del:hover { background: #fee2e2; color: #991b1b; } 
+    .admin-table .btn-icon.edit-btn:hover { background: #dbeafe; color: #1d4ed8; } 
+  
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; } 
+    .stat-box { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; } 
+    .stat-box-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(197,5,12,0.08); color: var(--uw-red); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; } 
+    .stat-box-info p { font-size: 0.78rem; color: var(--gray-500); margin: 0; } 
+    .stat-box-info h3 { font-size: 1.6rem; font-weight: 700; margin: 0; } 
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); } 
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.4; } 
+  
+    .btn-cancel { background: var(--gray-100); color: var(--gray-700); border: none; padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; } 
+    .btn-cancel:hover { background: var(--gray-200); } 
+    .editing-banner { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #1d4ed8; display: none; } 
+    .editing-banner.active { display: flex; align-items: center; gap: 0.5rem; } 
+  </style> 
+</head> 
+<body> 
+  
+  <div class="admin-nav-bar" id="adminBar"> 
+    <div class="container"> 
+      <span><i class="fas fa-shield-halved"></i> Admin Dashboard &mdash; <span id="adminEmail">loading...</span></span> 
+      <div> 
+        <a href="index.html"><i class="fas fa-globe"></i> View Site</a> 
+        <a href="#" id="logoutLink"><i class="fas fa-right-from-bracket"></i> Log out</a> 
+      </div> 
+    </div> 
+  </div> 
+  
+  <section class="page-hero admin-hero" style="padding: 2.5rem 0;"> 
+    <div class="container"> 
+      <h1>Admin <span>Dashboard</span></h1> 
+      <p>Manage events, leadership, job postings, achievements, and contact submissions.</p> 
+    </div> 
+  </section> 
+  
+  <section class="admin-section" style="padding-top: 1.5rem;"> 
+    <div class="container"> 
+  
+      <!-- Stats row --> 
+      <div class="stats-row" id="statsRow"> 
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-calendar-days"></i></div><div class="stat-box-info"><p>Upcoming Events</p><h3 id="statEvents">—</h3></div></div> 
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-briefcase"></i></div><div class="stat-box-info"><p>Active Jobs</p><h3 id="statJobs">—</h3></div></div> 
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-users"></i></div><div class="stat-box-info"><p>Board Members</p><h3 id="statBoard">—</h3></div></div> 
+        <div class="stat-box"><div class="stat-box-icon"><i class="fas fa-envelope"></i></div><div class="stat-box-info"><p>Contact Submissions</p><h3 id="statContacts">—</h3></div></div> 
+      </div> 
+  
+      <!-- Tab nav --> 
+      <div class="admin-tabs"> 
+        <button class="admin-tab active" data-tab="events"><i class="fas fa-calendar-days"></i> Events</button> 
+        <button class="admin-tab" data-tab="jobs"><i class="fas fa-briefcase"></i> Job Postings</button> 
+        <button class="admin-tab" data-tab="board"><i class="fas fa-users"></i> Exec Board</button> 
+        <button class="admin-tab" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button> 
+        <button class="admin-tab" data-tab="contacts"><i class="fas fa-envelope"></i> Contact Submissions</button> 
+      </div> 
+  
+      <!-- ── EVENTS PANEL ── --> 
+      <div class="admin-panel active" id="panel-events"> 
+        <div class="admin-form" style="text-align: center; padding: 2.5rem 2rem;"> 
+          <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(197,5,12,0.08); color: var(--uw-red); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1.25rem;">
+            <i class="fas fa-calendar-days"></i>
+          </div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; justify-content: center;"><i class="fas fa-calendar-days" style="color: var(--uw-red);"></i> Events are managed in Google Calendar</h3>
+          <p style="color: var(--gray-500); font-size: 0.9rem; max-width: 480px; margin: 0 auto 1.5rem;">
+            All ISS events are created and edited directly in Google Calendar. Changes appear on the public events page automatically — no action needed here.
+          </p>
+          <div style="background: var(--gray-100); border-radius: 10px; padding: 1rem 1.25rem; max-width: 520px; margin: 0 auto 1.75rem; text-align: left; font-size: 0.85rem; color: var(--gray-700);">
+            <strong style="display: block; margin-bottom: 0.5rem;"><i class="fas fa-tag" style="color: var(--uw-red); margin-right: 0.4rem;"></i> Tagging events by type</strong>
+            Add one of these to the event <em>Description</em> in Google Calendar:
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem;">
+              <code style="background: white; border: 1px solid var(--gray-200); border-radius: 5px; padding: 0.2rem 0.5rem;">#social</code>
+              <code style="background: white; border: 1px solid var(--gray-200); border-radius: 5px; padding: 0.2rem 0.5rem;">#alumni</code>
+              <code style="background: white; border: 1px solid var(--gray-200); border-radius: 5px; padding: 0.2rem 0.5rem;">#company</code>
+              <code style="background: white; border: 1px solid var(--gray-200); border-radius: 5px; padding: 0.2rem 0.5rem;">#workshop</code>
             </div>
-            <div class="admin-field"><label>Date *</label><input type="date" id="ev-date"></div>
-            <div class="admin-field"><label>Time *</label><input type="text" id="ev-time" placeholder="e.g. 6:00 PM"></div>
+            <span style="display: block; margin-top: 0.5rem; color: var(--gray-500);">Events with no tag default to Social.</span>
           </div>
-          <div class="admin-field"><label>Location *</label><input type="text" id="ev-location" placeholder="Grainger Hall 1120"></div>
-          <div class="admin-form-actions">
-            <button class="btn btn-primary" id="ev-save"><i class="fas fa-floppy-disk"></i> Save Event</button>
-            <button class="btn-cancel" id="ev-cancel" style="display:none;">Cancel Edit</button>
-          </div>
-          <p class="admin-msg" id="ev-msg"></p>
-        </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Location</th><th>Actions</th></tr></thead>
-            <tbody id="ev-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
- 
-      <!-- ── JOB POSTINGS PANEL ── -->
-      <div class="admin-panel" id="panel-jobs">
-        <div class="admin-form">
-          <div class="editing-banner" id="job-editing-banner"><i class="fas fa-pen"></i> <span id="job-editing-label">Editing job</span></div>
-          <h3 id="job-form-title"><i class="fas fa-plus-circle"></i> Add Job Posting</h3>
-          <input type="hidden" id="job-edit-id">
-          <div class="admin-row-2">
-            <div class="admin-field"><label>Job Title *</label><input type="text" id="job-title" placeholder="Software Engineer Intern"></div>
-            <div class="admin-field"><label>Company *</label><input type="text" id="job-company" placeholder="Epic Systems"></div>
-          </div>
-          <div class="admin-field"><label>Description *</label><textarea id="job-desc" placeholder="Brief job description..."></textarea></div>
-          <div class="admin-field"><label>Application Link *</label><input type="url" id="job-link" placeholder="https://..."></div>
-          <div class="admin-form-actions">
-            <button class="btn btn-primary" id="job-save"><i class="fas fa-floppy-disk"></i> Post Job</button>
-            <button class="btn-cancel" id="job-cancel" style="display:none;">Cancel Edit</button>
-          </div>
-          <p class="admin-msg" id="job-msg"></p>
-        </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
-            <tbody id="job-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
- 
-      <!-- ── EXEC BOARD PANEL ── -->
-      <div class="admin-panel" id="panel-board">
-        <div class="admin-form">
-          <div class="editing-banner" id="bd-editing-banner"><i class="fas fa-pen"></i> <span id="bd-editing-label">Editing member</span></div>
-          <h3 id="bd-form-title"><i class="fas fa-plus-circle"></i> Add Board Member</h3>
-          <input type="hidden" id="bd-edit-id">
-          <div class="admin-row-2">
-            <div class="admin-field"><label>Full Name *</label><input type="text" id="bd-name" placeholder="Jane Smith"></div>
-            <div class="admin-field"><label>Role / Title *</label><input type="text" id="bd-role" placeholder="VP of Events"></div>
-          </div>
-          <div class="admin-row-3">
-            <div class="admin-field"><label>Year</label><input type="text" id="bd-year" placeholder="e.g. Senior or 2025-2026"></div>
-            <div class="admin-field"><label>Display Order</label><input type="number" id="bd-order" placeholder="1, 2, 3..."></div>
-            <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="bd-photo" placeholder="https://..."></div>
-          </div>
-          <div class="admin-row-2">
-            <div class="admin-field"><label>LinkedIn URL (optional)</label><input type="url" id="bd-linkedin" placeholder="https://linkedin.com/in/..."></div>
-            <div class="admin-field"><label>Email (optional)</label><input type="email" id="bd-email" placeholder="you@wisc.edu"></div>
-          </div>
-          <div class="admin-form-actions">
-            <button class="btn btn-primary" id="bd-save"><i class="fas fa-floppy-disk"></i> Add Member</button>
-            <button class="btn-cancel" id="bd-cancel" style="display:none;">Cancel Edit</button>
-          </div>
-          <p class="admin-msg" id="bd-msg"></p>
-        </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Year</th><th>Order</th><th>Actions</th></tr></thead>
-            <tbody id="bd-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
- 
-      <!-- ── ACHIEVEMENTS PANEL ── -->
-      <div class="admin-panel" id="panel-achievements">
-        <div class="admin-form">
-          <div class="editing-banner" id="ach-editing-banner"><i class="fas fa-pen"></i> <span id="ach-editing-label">Editing achievement</span></div>
-          <h3 id="ach-form-title"><i class="fas fa-plus-circle"></i> Add Achievement</h3>
-          <input type="hidden" id="ach-edit-id">
-          <div class="admin-field"><label>Title *</label><input type="text" id="ach-title" placeholder="1st Place — Case Competition"></div>
-          <div class="admin-field"><label>Description *</label><textarea id="ach-desc" placeholder="Brief description..."></textarea></div>
-          <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div>
-          <div class="admin-form-actions">
-            <button class="btn btn-primary" id="ach-save"><i class="fas fa-floppy-disk"></i> Save Achievement</button>
-            <button class="btn-cancel" id="ach-cancel" style="display:none;">Cancel Edit</button>
-          </div>
-          <p class="admin-msg" id="ach-msg"></p>
-        </div>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Title</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead>
-            <tbody id="ach-tbody"><tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
- 
-      <!-- ── CONTACTS PANEL ── -->
-      <div class="admin-panel" id="panel-contacts">
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Interest</th><th>Message</th><th>Submitted</th><th>Actions</th></tr></thead>
-            <tbody id="ct-tbody"><tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
- 
-    </div>
-  </section>
- 
-  <script type="module">
-    import { auth, db, onAuthStateChanged, signOut } from './firebase-config.js';
-    import {
-      collection, addDoc, getDocs, deleteDoc, updateDoc,
-      doc, serverTimestamp, query, orderBy, Timestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- 
-    // ── Auth guard ──
-    onAuthStateChanged(auth, (user) => {
-      if (!user) { location.href = 'login.html?next=admin-dashboard.html'; return; }
-      document.getElementById('adminEmail').textContent = user.email;
-    });
- 
-    document.getElementById('logoutLink').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await signOut(auth);
-      location.href = 'login.html';
-    });
- 
-    // ── Tab switching ──
-    document.querySelectorAll('.admin-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-      });
-    });
- 
-    // ── Helpers ──
-    function msg(id, text, type) {
-      const el = document.getElementById(id);
-      el.textContent = text;
-      el.className = 'admin-msg ' + type;
-      setTimeout(() => el.className = 'admin-msg', 4000);
-    }
- 
-    function fmtDate(ts) {
-      if (!ts) return '';
-      const d = ts.toDate ? ts.toDate() : new Date(ts);
-      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-    }
- 
-    function resetForm(fields, editIdField, bannerEl, titleEl, saveBtn, cancelBtn, defaultTitle, defaultSaveLabel) {
-      fields.forEach(id => document.getElementById(id).value = '');
-      document.getElementById(editIdField).value = '';
-      bannerEl.classList.remove('active');
-      titleEl.innerHTML = defaultTitle;
-      saveBtn.innerHTML = defaultSaveLabel;
-      cancelBtn.style.display = 'none';
-    }
- 
-    // ══════════════════════════════════════════
-    // ── EVENTS ──
-    // ══════════════════════════════════════════
-    async function loadEvents() {
-      const tbody = document.getElementById('ev-tbody');
-      try {
-        const snap = await getDocs(query(collection(db, 'Events'), orderBy('eventDate', 'asc')));
-        document.getElementById('statEvents').textContent = snap.size;
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-calendar-xmark"></i> No events yet.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-          const ev = d.data();
-          const dataAttr = encodeURIComponent(JSON.stringify(ev));
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr>
-              <td><strong>${ev.title||''}</strong></td>
-              <td>${ev.type||''}</td>
-              <td>${fmtDate(ev.eventDate)}</td>
-              <td>${ev.location||''}</td>
-              <td>
-                <button class="btn-icon edit-btn" onclick="editEvent('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
-                <button class="btn-icon del" onclick="delDoc('Events','${d.id}','ev-msg', loadEvents)"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>`);
-        });
-      } catch(e) { console.error(e); }
-    }
- 
-    window.editEvent = (id, dataStr) => {
-      const ev = JSON.parse(dataStr);
-      document.getElementById('ev-edit-id').value = id;
-      document.getElementById('ev-title').value = ev.title || '';
-      document.getElementById('ev-desc').value = ev.description || '';
-      document.getElementById('ev-type').value = ev.type || 'social';
-      document.getElementById('ev-time').value = ev.time || '';
-      document.getElementById('ev-location').value = ev.location || '';
-      if (ev.eventDate?.seconds) {
-        const d = new Date(ev.eventDate.seconds * 1000);
-        document.getElementById('ev-date').value = d.toISOString().split('T')[0];
-      }
-      const banner = document.getElementById('ev-editing-banner');
-      banner.classList.add('active');
-      document.getElementById('ev-editing-label').textContent = 'Editing: ' + (ev.title || 'event');
-      document.getElementById('ev-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Event';
-      document.getElementById('ev-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
-      document.getElementById('ev-cancel').style.display = '';
-      document.getElementById('ev-title').scrollIntoView({ behavior: 'smooth' });
-    };
- 
-    document.getElementById('ev-cancel').addEventListener('click', () => {
-      resetForm(
-        ['ev-edit-id','ev-title','ev-desc','ev-time','ev-location','ev-date'],
-        'ev-edit-id',
-        document.getElementById('ev-editing-banner'),
-        document.getElementById('ev-form-title'),
-        document.getElementById('ev-save'),
-        document.getElementById('ev-cancel'),
-        '<i class="fas fa-plus-circle"></i> Add New Event',
-        '<i class="fas fa-floppy-disk"></i> Save Event'
-      );
-    });
- 
-    document.getElementById('ev-save').addEventListener('click', async () => {
-      const editId = document.getElementById('ev-edit-id').value;
-      const title  = document.getElementById('ev-title').value.trim();
-      const desc   = document.getElementById('ev-desc').value.trim();
-      const type   = document.getElementById('ev-type').value;
-      const dateV  = document.getElementById('ev-date').value;
-      const time   = document.getElementById('ev-time').value.trim();
-      const loc    = document.getElementById('ev-location').value.trim();
-      if (!title || !desc || !dateV || !time || !loc) { msg('ev-msg','Please fill all required fields.','err'); return; }
-      try {
-        const data = {
-          title, description: desc, type, time, location: loc,
-          eventDate: Timestamp.fromDate(new Date(dateV + 'T00:00:00')),
-        };
-        if (editId) {
-          await updateDoc(doc(db, 'Events', editId), data);
-          msg('ev-msg', 'Event updated!', 'ok');
-        } else {
-          await addDoc(collection(db, 'Events'), { ...data, createdBy: auth.currentUser?.uid || '' });
-          msg('ev-msg', 'Event saved!', 'ok');
-        }
-        document.getElementById('ev-cancel').click();
-        loadEvents();
-      } catch(e) { msg('ev-msg', 'Error: ' + e.message, 'err'); }
-    });
- 
-    // ══════════════════════════════════════════
-    // ── JOB POSTINGS ──
-    // ══════════════════════════════════════════
-    async function loadJobs() {
-      const tbody = document.getElementById('job-tbody');
-      try {
-        const snap = await getDocs(query(collection(db, 'Job Postings'), orderBy('datePosted', 'desc')));
-        const active = snap.docs.filter(d => d.data().isActive !== false).length;
-        document.getElementById('statJobs').textContent = active;
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-briefcase"></i> No job postings yet.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-          const j = d.data();
-          const isActive = j.isActive !== false;
-          const dataAttr = encodeURIComponent(JSON.stringify(j));
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr>
-              <td><strong>${j.title||''}</strong></td>
-              <td>${j.company||''}</td>
-              <td><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
-              <td>${fmtDate(j.datePosted)}</td>
-              <td>
-                <button class="btn-icon edit-btn" onclick="editJob('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
-                <button class="btn-icon" onclick="toggleJob('${d.id}', ${isActive})"><i class="fas fa-${isActive ? 'eye-slash' : 'eye'}"></i></button>
-                <button class="btn-icon del" onclick="delDoc('Job Postings','${d.id}','job-msg', loadJobs)"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>`);
-        });
-      } catch(e) { console.error(e); }
-    }
- 
-    window.toggleJob = async (id, current) => {
-      try {
-        await updateDoc(doc(db, 'Job Postings', id), { isActive: !current });
-        loadJobs();
-      } catch(e) { alert('Error: ' + e.message); }
-    };
- 
-    window.editJob = (id, dataStr) => {
-      const j = JSON.parse(dataStr);
-      document.getElementById('job-edit-id').value = id;
-      document.getElementById('job-title').value = j.title || '';
-      document.getElementById('job-company').value = j.company || '';
-      document.getElementById('job-desc').value = j.description || '';
-      document.getElementById('job-link').value = j.applicationLink || '';
-      const banner = document.getElementById('job-editing-banner');
-      banner.classList.add('active');
-      document.getElementById('job-editing-label').textContent = 'Editing: ' + (j.title || 'job');
-      document.getElementById('job-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Job Posting';
-      document.getElementById('job-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
-      document.getElementById('job-cancel').style.display = '';
-      document.getElementById('job-title').scrollIntoView({ behavior: 'smooth' });
-    };
- 
-    document.getElementById('job-cancel').addEventListener('click', () => {
-      resetForm(
-        ['job-edit-id','job-title','job-company','job-desc','job-link'],
-        'job-edit-id',
-        document.getElementById('job-editing-banner'),
-        document.getElementById('job-form-title'),
-        document.getElementById('job-save'),
-        document.getElementById('job-cancel'),
-        '<i class="fas fa-plus-circle"></i> Add Job Posting',
-        '<i class="fas fa-floppy-disk"></i> Post Job'
-      );
-    });
- 
-    document.getElementById('job-save').addEventListener('click', async () => {
-      const editId  = document.getElementById('job-edit-id').value;
-      const title   = document.getElementById('job-title').value.trim();
-      const company = document.getElementById('job-company').value.trim();
-      const desc    = document.getElementById('job-desc').value.trim();
-      const link    = document.getElementById('job-link').value.trim();
-      if (!title || !company || !desc || !link) { msg('job-msg','Please fill all required fields.','err'); return; }
-      try {
-        const data = { title, company, description: desc, applicationLink: link };
-        if (editId) {
-          await updateDoc(doc(db, 'Job Postings', editId), data);
-          msg('job-msg', 'Job updated!', 'ok');
-        } else {
-          await addDoc(collection(db, 'Job Postings'), { ...data, isActive: true, datePosted: serverTimestamp(), createdBy: auth.currentUser?.uid || '' });
-          msg('job-msg', 'Job posted!', 'ok');
-        }
-        document.getElementById('job-cancel').click();
-        loadJobs();
-      } catch(e) { msg('job-msg', 'Error: ' + e.message, 'err'); }
-    });
- 
-    // ══════════════════════════════════════════
-    // ── EXEC BOARD ──
-    // ══════════════════════════════════════════
-    async function loadBoard() {
-      const tbody = document.getElementById('bd-tbody');
-      try {
-        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc')));
-        document.getElementById('statBoard').textContent = snap.size;
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-users"></i> No board members yet.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-          const m = d.data();
-          const dataAttr = encodeURIComponent(JSON.stringify(m));
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr>
-              <td><strong>${m.name||''}</strong></td>
-              <td>${m.role||''}</td>
-              <td>${m.year||''}</td>
-              <td style="text-align:center">${m.displayOrder ?? '—'}</td>
-              <td>
-                <button class="btn-icon edit-btn" onclick="editMember('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
-                <button class="btn-icon del" onclick="delDoc('Leadership','${d.id}','bd-msg', loadBoard)"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>`);
-        });
-      } catch(e) { console.error(e); }
-    }
- 
-    window.editMember = (id, dataStr) => {
-      const m = JSON.parse(dataStr);
-      document.getElementById('bd-edit-id').value = id;
-      document.getElementById('bd-name').value = m.name || '';
-      document.getElementById('bd-role').value = m.role || '';
-      document.getElementById('bd-year').value = m.year || '';
-      document.getElementById('bd-order').value = m.displayOrder || '';
-      document.getElementById('bd-photo').value = m.photoUrl || '';
-      document.getElementById('bd-linkedin').value = m.linkedinUrl || '';
-      document.getElementById('bd-email').value = m.email || '';
-      const banner = document.getElementById('bd-editing-banner');
-      banner.classList.add('active');
-      document.getElementById('bd-editing-label').textContent = 'Editing: ' + (m.name || 'member');
-      document.getElementById('bd-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Board Member';
-      document.getElementById('bd-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
-      document.getElementById('bd-cancel').style.display = '';
-      document.getElementById('bd-name').scrollIntoView({ behavior: 'smooth' });
-    };
- 
-    document.getElementById('bd-cancel').addEventListener('click', () => {
-      resetForm(
-        ['bd-edit-id','bd-name','bd-role','bd-year','bd-order','bd-photo','bd-linkedin','bd-email'],
-        'bd-edit-id',
-        document.getElementById('bd-editing-banner'),
-        document.getElementById('bd-form-title'),
-        document.getElementById('bd-save'),
-        document.getElementById('bd-cancel'),
-        '<i class="fas fa-plus-circle"></i> Add Board Member',
-        '<i class="fas fa-floppy-disk"></i> Add Member'
-      );
-    });
- 
-    document.getElementById('bd-save').addEventListener('click', async () => {
-      const editId  = document.getElementById('bd-edit-id').value;
-      const name    = document.getElementById('bd-name').value.trim();
-      const role    = document.getElementById('bd-role').value.trim();
-      const year    = document.getElementById('bd-year').value.trim();
-      const order   = parseInt(document.getElementById('bd-order').value) || 99;
-      const photo   = document.getElementById('bd-photo').value.trim();
-      const linkedin = document.getElementById('bd-linkedin').value.trim();
-      const email   = document.getElementById('bd-email').value.trim();
-      if (!name || !role) { msg('bd-msg','Name and role are required.','err'); return; }
-      try {
-        const data = { name, role, year, displayOrder: order, photoUrl: photo || '', linkedinUrl: linkedin || '', email: email || '' };
-        if (editId) {
-          await updateDoc(doc(db, 'Leadership', editId), data);
-          msg('bd-msg', 'Member updated!', 'ok');
-        } else {
-          await addDoc(collection(db, 'Leadership'), { ...data, createdBy: auth.currentUser?.uid || '' });
-          msg('bd-msg', 'Member added!', 'ok');
-        }
-        document.getElementById('bd-cancel').click();
-        loadBoard();
-      } catch(e) { msg('bd-msg', 'Error: ' + e.message, 'err'); }
-    });
- 
-    // ══════════════════════════════════════════
-    // ── ACHIEVEMENTS ──
-    // ══════════════════════════════════════════
-    async function loadAchievements() {
-      const tbody = document.getElementById('ach-tbody');
-      try {
-        const snap = await getDocs(query(collection(db, 'Achievements'), orderBy('year', 'desc')));
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-trophy"></i> No achievements yet.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-          const a = d.data();
-          const dataAttr = encodeURIComponent(JSON.stringify(a));
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr>
-              <td><strong>${a.title||''}</strong></td>
-              <td>${a.year||''}</td>
-              <td>${a.description||''}</td>
-              <td>
-                <button class="btn-icon edit-btn" onclick="editAchievement('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
-                <button class="btn-icon del" onclick="delDoc('Achievements','${d.id}','ach-msg', loadAchievements)"><i class="fas fa-trash"></i></button>
-              </td>
-            </tr>`);
-        });
-      } catch(e) { console.error(e); }
-    }
- 
-    window.editAchievement = (id, dataStr) => {
-      const a = JSON.parse(dataStr);
-      document.getElementById('ach-edit-id').value = id;
-      document.getElementById('ach-title').value = a.title || '';
-      document.getElementById('ach-desc').value = a.description || '';
-      document.getElementById('ach-year').value = a.year || '';
-      const banner = document.getElementById('ach-editing-banner');
-      banner.classList.add('active');
-      document.getElementById('ach-editing-label').textContent = 'Editing: ' + (a.title || 'achievement');
-      document.getElementById('ach-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Achievement';
-      document.getElementById('ach-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
-      document.getElementById('ach-cancel').style.display = '';
-      document.getElementById('ach-title').scrollIntoView({ behavior: 'smooth' });
-    };
- 
-    document.getElementById('ach-cancel').addEventListener('click', () => {
-      resetForm(
-        ['ach-edit-id','ach-title','ach-desc','ach-year'],
-        'ach-edit-id',
-        document.getElementById('ach-editing-banner'),
-        document.getElementById('ach-form-title'),
-        document.getElementById('ach-save'),
-        document.getElementById('ach-cancel'),
-        '<i class="fas fa-plus-circle"></i> Add Achievement',
-        '<i class="fas fa-floppy-disk"></i> Save Achievement'
-      );
-    });
- 
-    document.getElementById('ach-save').addEventListener('click', async () => {
-      const editId = document.getElementById('ach-edit-id').value;
-      const title  = document.getElementById('ach-title').value.trim();
-      const desc   = document.getElementById('ach-desc').value.trim();
-      const year   = parseInt(document.getElementById('ach-year').value);
-      if (!title || !desc || !year) { msg('ach-msg','Please fill all required fields.','err'); return; }
-      try {
-        const data = { title, description: desc, year };
-        if (editId) {
-          await updateDoc(doc(db, 'Achievements', editId), data);
-          msg('ach-msg', 'Achievement updated!', 'ok');
-        } else {
-          await addDoc(collection(db, 'Achievements'), { ...data, createdBy: auth.currentUser?.uid || '' });
-          msg('ach-msg', 'Achievement saved!', 'ok');
-        }
-        document.getElementById('ach-cancel').click();
-        loadAchievements();
-      } catch(e) { msg('ach-msg', 'Error: ' + e.message, 'err'); }
-    });
- 
-    // ══════════════════════════════════════════
-    // ── CONTACTS (read-only, delete only) ──
-    // ══════════════════════════════════════════
-    async function loadContacts() {
-      const tbody = document.getElementById('ct-tbody');
-      try {
-        const snap = await getDocs(query(collection(db, 'Contacts'), orderBy('submittedAt', 'desc')));
-        document.getElementById('statContacts').textContent = snap.size;
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i> No submissions yet.</td></tr>'; return; }
-        tbody.innerHTML = '';
-        snap.forEach(d => {
-          const c = d.data();
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr>
-              <td><strong>${c.firstName||''} ${c.lastName||''}</strong></td>
-              <td><a href="mailto:${c.email||''}">${c.email||''}</a></td>
-              <td>${c.interest||''}</td>
-              <td style="max-width:260px; white-space:pre-wrap;">${c.message||''}</td>
-              <td>${fmtDate(c.submittedAt)}</td>
-              <td><button class="btn-icon del" onclick="delDoc('Contacts','${d.id}','', loadContacts)"><i class="fas fa-trash"></i></button></td>
-            </tr>`);
-        });
-      } catch(e) { console.error(e); }
-    }
- 
-    // ── Shared delete ──
-    window.delDoc = async (col, id, msgId, reloadFn) => {
-      if (!confirm('Delete this record? This cannot be undone.')) return;
-      try {
-        await deleteDoc(doc(db, col, id));
-        if (msgId) msg(msgId, 'Deleted.', 'ok');
-        reloadFn();
-      } catch(e) { alert('Error: ' + e.message); }
-    };
- 
-    window.loadEvents = loadEvents;
-    window.loadJobs = loadJobs;
-    window.loadBoard = loadBoard;
-    window.loadAchievements = loadAchievements;
-    window.loadContacts = loadContacts;
- 
-    // ── Initial load ──
-    loadEvents();
-    loadJobs();
-    loadBoard();
-    loadAchievements();
-    loadContacts();
-  </script>
-</body>
-</html>
+          <a href="https://calendar.google.com/calendar/r" target="_blank" class="btn btn-primary" style="display: inline-flex;">
+            <i class="fas fa-arrow-up-right-from-square"></i> Open Google Calendar
+          </a>
+        </div> 
+      </div> 
+  
+      <!-- ── JOB POSTINGS PANEL ── --> 
+      <div class="admin-panel" id="panel-jobs"> 
+        <div class="admin-form"> 
+          <div class="editing-banner" id="job-editing-banner"><i class="fas fa-pen"></i> <span id="job-editing-label">Editing job</span></div> 
+          <h3 id="job-form-title"><i class="fas fa-plus-circle"></i> Add Job Posting</h3> 
+          <input type="hidden" id="job-edit-id"> 
+          <div class="admin-row-2"> 
+            <div class="admin-field"><label>Job Title *</label><input type="text" id="job-title" placeholder="Software Engineer Intern"></div> 
+            <div class="admin-field"><label>Company *</label><input type="text" id="job-company" placeholder="Company Name"></div> 
+          </div> 
+          <div class="admin-row-2"> 
+            <div class="admin-field"><label>Location *</label><input type="text" id="location" placeholder="Madison, WI"></div> 
+            <div class="admin-field"><label>Salary</label><input type="text" id="salary" placeholder="$65,000"></div> 
+          </div> 
+          <div class="admin-field"><label>Description *</label><textarea id="job-desc" placeholder="Brief job description..."></textarea></div> 
+          <div class="admin-row-2"> 
+          <div class="admin-field"><label>Work Type *</label> 
+            <select id="job-worktype"> 
+              <option value="remote">Remote</option> 
+              <option value="hybrid">Hybrid</option> 
+              <option value="onsite">On-site</option> 
+              <option value="internship">Internship</option> 
+            </select> 
+          </div> 
+           <div class="admin-field"><label>Application Link *</label><input type="url" id="job-link" placeholder="https://..."></div> 
+          </div> 
+          <div class="admin-form-actions"> 
+            <button class="btn btn-primary" id="job-save"><i class="fas fa-floppy-disk"></i> Post Job</button> 
+            <button class="btn-cancel" id="job-cancel" style="display:none;">Cancel Edit</button> 
+          </div> 
+          <p class="admin-msg" id="job-msg"></p> 
+        </div> 
+        <div class="admin-table-wrap"> 
+          <table class="admin-table"> 
+            <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead> 
+            <tbody id="job-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody> 
+          </table> 
+        </div> 
+      </div> 
+  
+      <!-- ── EXEC BOARD PANEL ── --> 
+      <div class="admin-panel" id="panel-board"> 
+        <div class="admin-form"> 
+          <div class="editing-banner" id="bd-editing-banner"><i class="fas fa-pen"></i> <span id="bd-editing-label">Editing member</span></div> 
+          <h3 id="bd-form-title"><i class="fas fa-plus-circle"></i> Add Board Member</h3> 
+          <input type="hidden" id="bd-edit-id"> 
+          <div class="admin-row-2"> 
+            <div class="admin-field"><label>Full Name *</label><input type="text" id="bd-name" placeholder="Jane Smith"></div> 
+            <div class="admin-field"><label>Role / Title *</label><input type="text" id="bd-role" placeholder="VP of Events"></div> 
+          </div> 
+          <div class="admin-row-3"> 
+            <div class="admin-field"><label>Year</label><input type="text" id="bd-year" placeholder="e.g. Senior or 2025-2026"></div> 
+            <div class="admin-field"><label>Display Order</label><input type="number" id="bd-order" placeholder="1, 2, 3..."></div> 
+            <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="bd-photo" placeholder="https://..."></div> 
+          </div> 
+          <div class="admin-row-2"> 
+            <div class="admin-field"><label>LinkedIn URL (optional)</label><input type="url" id="bd-linkedin" placeholder="https://linkedin.com/in/..."></div> 
+            <div class="admin-field"><label>Email (optional)</label><input type="email" id="bd-email" placeholder="you@wisc.edu"></div> 
+          </div> 
+          <div class="admin-form-actions"> 
+            <button class="btn btn-primary" id="bd-save"><i class="fas fa-floppy-disk"></i> Add Member</button> 
+            <button class="btn-cancel" id="bd-cancel" style="display:none;">Cancel Edit</button> 
+          </div> 
+          <p class="admin-msg" id="bd-msg"></p> 
+        </div> 
+        <div class="admin-table-wrap"> 
+          <table class="admin-table"> 
+            <thead><tr><th>Name</th><th>Role</th><th>Year</th><th>Order</th><th>Actions</th></tr></thead> 
+            <tbody id="bd-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody> 
+          </table> 
+        </div> 
+      </div> 
+  
+      <!-- ── ACHIEVEMENTS PANEL ── --> 
+      <div class="admin-panel" id="panel-achievements"> 
+        <div class="admin-form"> 
+          <div class="editing-banner" id="ach-editing-banner"><i class="fas fa-pen"></i> <span id="ach-editing-label">Editing achievement</span></div> 
+          <h3 id="ach-form-title"><i class="fas fa-plus-circle"></i> Add Achievement</h3> 
+          <input type="hidden" id="ach-edit-id"> 
+          <div class="admin-field"><label>Title *</label><input type="text" id="ach-title" placeholder="1st Place — Case Competition"></div> 
+          <div class="admin-field"><label>Description *</label><textarea id="ach-desc" placeholder="Brief description..."></textarea></div> 
+          <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div> 
+          <div class="admin-form-actions"> 
+            <button class="btn btn-primary" id="ach-save"><i class="fas fa-floppy-disk"></i> Save Achievement</button> 
+            <button class="btn-cancel" id="ach-cancel" style="display:none;">Cancel Edit</button> 
+          </div> 
+          <p class="admin-msg" id="ach-msg"></p> 
+        </div> 
+        <div class="admin-table-wrap"> 
+          <table class="admin-table"> 
+            <thead><tr><th>Title</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead> 
+            <tbody id="ach-tbody"><tr><td colspan="4" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody> 
+          </table> 
+        </div> 
+      </div> 
+  
+      <!-- ── CONTACTS PANEL ── --> 
+      <div class="admin-panel" id="panel-contacts"> 
+        <div class="admin-table-wrap"> 
+          <table class="admin-table"> 
+            <thead><tr><th>Name</th><th>Email</th><th>Interest</th><th>Message</th><th>Submitted</th><th>Actions</th></tr></thead> 
+            <tbody id="ct-tbody"><tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody> 
+          </table> 
+        </div> 
+      </div> 
+  
+    </div> 
+  </section> 
+  
+  <script type="module"> 
+    import { auth, db, onAuthStateChanged, signOut } from './firebase-config.js'; 
+    import { 
+      collection, addDoc, getDocs, deleteDoc, updateDoc, 
+      doc, serverTimestamp, query, orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; 
+  
+    // ── Auth guard ── 
+    onAuthStateChanged(auth, (user) => { 
+      if (!user) { location.href = 'login.html?next=admin-dashboard.html'; return; } 
+      document.getElementById('adminEmail').textContent = user.email; 
+    }); 
+  
+    document.getElementById('logoutLink').addEventListener('click', async (e) => { 
+      e.preventDefault(); 
+      await signOut(auth); 
+      location.href = 'login.html'; 
+    }); 
+  
+    // ── Tab switching ── 
+    document.querySelectorAll('.admin-tab').forEach(tab => { 
+      tab.addEventListener('click', () => { 
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active')); 
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active')); 
+        tab.classList.add('active'); 
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active'); 
+      }); 
+    }); 
+  
+    // ── Helpers ── 
+    function msg(id, text, type) { 
+      const el = document.getElementById(id); 
+      el.textContent = text; 
+      el.className = 'admin-msg ' + type; 
+      setTimeout(() => el.className = 'admin-msg', 4000); 
+    } 
+  
+    function fmtDate(ts) { 
+      if (!ts) return ''; 
+      const d = ts.toDate ? ts.toDate() : new Date(ts); 
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); 
+    } 
+  
+    function resetForm(fields, editIdField, bannerEl, titleEl, saveBtn, cancelBtn, defaultTitle, defaultSaveLabel) { 
+      fields.forEach(id => document.getElementById(id).value = ''); 
+      document.getElementById(editIdField).value = ''; 
+      bannerEl.classList.remove('active'); 
+      titleEl.innerHTML = defaultTitle; 
+      saveBtn.innerHTML = defaultSaveLabel; 
+      cancelBtn.style.display = 'none'; 
+    } 
+  
+    // ══════════════════════════════════════════ 
+    // ── EVENTS STAT (from Google Calendar) ── 
+    // ══════════════════════════════════════════ 
+    async function loadEventsStat() { 
+      try { 
+        const CALENDAR_ID = '1c16b5902eef065707bc5e445749fdd13bcf23641b261001318fc6a7077b4010@group.calendar.google.com'; 
+        const API_KEY = 'AIzaSyBdIXRZ9dI7u8YKRQ3AlDYH6fh8zHgEEAQ'; 
+        const now = new Date().toISOString(); 
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&timeMin=${now}&maxResults=50`; 
+        const res = await fetch(url); 
+        if (!res.ok) throw new Error(); 
+        const data = await res.json(); 
+        document.getElementById('statEvents').textContent = data.items?.length ?? 0; 
+      } catch(e) { 
+        document.getElementById('statEvents').textContent = '—'; 
+      } 
+    } 
+  
+    // ══════════════════════════════════════════ 
+    // ── JOB POSTINGS ── 
+    // ══════════════════════════════════════════ 
+    async function loadJobs() { 
+      const tbody = document.getElementById('job-tbody'); 
+      try { 
+        const snap = await getDocs(query(collection(db, 'Job Postings'), orderBy('datePosted', 'desc'))); 
+        const active = snap.docs.filter(d => d.data().isActive !== false).length; 
+        document.getElementById('statJobs').textContent = active; 
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-briefcase"></i> No job postings yet.</td></tr>'; return; } 
+        tbody.innerHTML = ''; 
+        snap.forEach(d => { 
+          const j = d.data(); 
+          const isActive = j.isActive !== false; 
+          const dataAttr = encodeURIComponent(JSON.stringify(j)); 
+          tbody.insertAdjacentHTML('beforeend', ` 
+            <tr> 
+              <td><strong>${j.title||''}</strong></td> 
+              <td>${j.company||''}</td> 
+              <td><span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td> 
+              <td>${fmtDate(j.datePosted)}</td> 
+              <td> 
+                <button class="btn-icon edit-btn" onclick="editJob('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button> 
+                <button class="btn-icon" onclick="toggleJob('${d.id}', ${isActive})"><i class="fas fa-${isActive ? 'eye-slash' : 'eye'}"></i></button> 
+                <button class="btn-icon del" onclick="delDoc('Job Postings','${d.id}','job-msg', loadJobs)"><i class="fas fa-trash"></i></button> 
+              </td> 
+            </tr>`); 
+        }); 
+      } catch(e) { console.error(e); } 
+    } 
+  
+    window.toggleJob = async (id, current) => { 
+      try { 
+        await updateDoc(doc(db, 'Job Postings', id), { isActive: !current }); 
+        loadJobs(); 
+      } catch(e) { alert('Error: ' + e.message); } 
+    }; 
+  
+    window.editJob = (id, dataStr) => { 
+      const j = JSON.parse(dataStr); 
+      document.getElementById('job-edit-id').value = id; 
+      document.getElementById('job-title').value = j.title || ''; 
+      document.getElementById('job-company').value = j.company || ''; 
+      document.getElementById('location').value = j.location || ''; 
+      document.getElementById('salary').value = j.salary || ''; 
+      document.getElementById('job-desc').value = j.description || ''; 
+      document.getElementById('job-worktype').value = j.workType || 'remote'; 
+      document.getElementById('job-link').value = j.applicationLink || ''; 
+      const banner = document.getElementById('job-editing-banner'); 
+      banner.classList.add('active'); 
+      document.getElementById('job-editing-label').textContent = 'Editing: ' + (j.title || 'job'); 
+      document.getElementById('job-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Job Posting'; 
+      document.getElementById('job-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes'; 
+      document.getElementById('job-cancel').style.display = ''; 
+      document.getElementById('job-title').scrollIntoView({ behavior: 'smooth' }); 
+    }; 
+  
+    document.getElementById('job-cancel').addEventListener('click', () => { 
+      resetForm( 
+        ['job-edit-id','job-title','job-company','location','salary','job-desc','job-link'], 
+        'job-edit-id', 
+        document.getElementById('job-editing-banner'), 
+        document.getElementById('job-form-title'), 
+        document.getElementById('job-save'), 
+        document.getElementById('job-cancel'), 
+        '<i class="fas fa-plus-circle"></i> Add Job Posting', 
+        '<i class="fas fa-floppy-disk"></i> Post Job' 
+      ); 
+    }); 
+  
+    document.getElementById('job-save').addEventListener('click', async () => { 
+      const editId  = document.getElementById('job-edit-id').value; 
+      const title   = document.getElementById('job-title').value.trim(); 
+      const company = document.getElementById('job-company').value.trim(); 
+      const desc    = document.getElementById('job-desc').value.trim(); 
+      const link    = document.getElementById('job-link').value.trim(); 
+      if (!title || !company || !desc || !link) { msg('job-msg','Please fill all required fields.','err'); return; } 
+      try { 
+        const workType = document.getElementById('job-worktype').value; 
+        const jobLocation = document.getElementById('location').value.trim();
+        const salary = document.getElementById('salary').value.trim();
+        const data = { title, company, location: jobLocation, salary, description: desc, applicationLink: link, workType };
+        if (editId) { 
+          await updateDoc(doc(db, 'Job Postings', editId), data); 
+          msg('job-msg', 'Job updated!', 'ok'); 
+        } else { 
+          await addDoc(collection(db, 'Job Postings'), { ...data, isActive: true, datePosted: serverTimestamp(), createdBy: auth.currentUser?.uid || '' }); 
+          msg('job-msg', 'Job posted!', 'ok'); 
+        } 
+        document.getElementById('job-cancel').click(); 
+        loadJobs(); 
+      } catch(e) { msg('job-msg', 'Error: ' + e.message, 'err'); } 
+    }); 
+  
+    // ══════════════════════════════════════════ 
+    // ── EXEC BOARD ── 
+    // ══════════════════════════════════════════ 
+    async function loadBoard() { 
+      const tbody = document.getElementById('bd-tbody'); 
+      try { 
+        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc'))); 
+        document.getElementById('statBoard').textContent = snap.size; 
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-users"></i> No board members yet.</td></tr>'; return; } 
+        tbody.innerHTML = ''; 
+        snap.forEach(d => { 
+          const m = d.data(); 
+          const dataAttr = encodeURIComponent(JSON.stringify(m)); 
+          tbody.insertAdjacentHTML('beforeend', ` 
+            <tr> 
+              <td><strong>${m.name||''}</strong></td> 
+              <td>${m.role||''}</td> 
+              <td>${m.year||''}</td> 
+              <td style="text-align:center">${m.displayOrder ?? '—'}</td> 
+              <td> 
+                <button class="btn-icon edit-btn" onclick="editMember('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button> 
+                <button class="btn-icon del" onclick="delDoc('Leadership','${d.id}','bd-msg', loadBoard)"><i class="fas fa-trash"></i></button> 
+              </td> 
+            </tr>`); 
+        }); 
+      } catch(e) { console.error(e); } 
+    } 
+  
+    window.editMember = (id, dataStr) => { 
+      const m = JSON.parse(dataStr); 
+      document.getElementById('bd-edit-id').value = id; 
+      document.getElementById('bd-name').value = m.name || ''; 
+      document.getElementById('bd-role').value = m.role || ''; 
+      document.getElementById('bd-year').value = m.year || ''; 
+      document.getElementById('bd-order').value = m.displayOrder || ''; 
+      document.getElementById('bd-photo').value = m.photoUrl || ''; 
+      document.getElementById('bd-linkedin').value = m.linkedinUrl || ''; 
+      document.getElementById('bd-email').value = m.email || ''; 
+      const banner = document.getElementById('bd-editing-banner'); 
+      banner.classList.add('active'); 
+      document.getElementById('bd-editing-label').textContent = 'Editing: ' + (m.name || 'member'); 
+      document.getElementById('bd-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Board Member'; 
+      document.getElementById('bd-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes'; 
+      document.getElementById('bd-cancel').style.display = ''; 
+      document.getElementById('bd-name').scrollIntoView({ behavior: 'smooth' }); 
+    }; 
+  
+    document.getElementById('bd-cancel').addEventListener('click', () => { 
+      resetForm( 
+        ['bd-edit-id','bd-name','bd-role','bd-year','bd-order','bd-photo','bd-linkedin','bd-email'], 
+        'bd-edit-id', 
+        document.getElementById('bd-editing-banner'), 
+        document.getElementById('bd-form-title'), 
+        document.getElementById('bd-save'), 
+        document.getElementById('bd-cancel'), 
+        '<i class="fas fa-plus-circle"></i> Add Board Member', 
+        '<i class="fas fa-floppy-disk"></i> Add Member' 
+      ); 
+    }); 
+  
+    document.getElementById('bd-save').addEventListener('click', async () => { 
+      const editId  = document.getElementById('bd-edit-id').value; 
+      const name    = document.getElementById('bd-name').value.trim(); 
+      const role    = document.getElementById('bd-role').value.trim(); 
+      const year    = document.getElementById('bd-year').value.trim(); 
+      const order   = parseInt(document.getElementById('bd-order').value) || 99; 
+      const photo   = document.getElementById('bd-photo').value.trim(); 
+      const linkedin = document.getElementById('bd-linkedin').value.trim(); 
+      const email   = document.getElementById('bd-email').value.trim(); 
+      if (!name || !role) { msg('bd-msg','Name and role are required.','err'); return; } 
+      try { 
+        const data = { name, role, year, displayOrder: order, photoUrl: photo || '', linkedinUrl: linkedin || '', email: email || '' }; 
+        if (editId) { 
+          await updateDoc(doc(db, 'Leadership', editId), data); 
+          msg('bd-msg', 'Member updated!', 'ok'); 
+        } else { 
+          await addDoc(collection(db, 'Leadership'), { ...data, createdBy: auth.currentUser?.uid || '' }); 
+          msg('bd-msg', 'Member added!', 'ok'); 
+        } 
+        document.getElementById('bd-cancel').click(); 
+        loadBoard(); 
+      } catch(e) { msg('bd-msg', 'Error: ' + e.message, 'err'); } 
+    }); 
+  
+    // ══════════════════════════════════════════ 
+    // ── ACHIEVEMENTS ── 
+    // ══════════════════════════════════════════ 
+    async function loadAchievements() { 
+      const tbody = document.getElementById('ach-tbody'); 
+      try { 
+        const snap = await getDocs(query(collection(db, 'Achievements'), orderBy('year', 'desc'))); 
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="fas fa-trophy"></i> No achievements yet.</td></tr>'; return; } 
+        tbody.innerHTML = ''; 
+        snap.forEach(d => { 
+          const a = d.data(); 
+          const dataAttr = encodeURIComponent(JSON.stringify(a)); 
+          tbody.insertAdjacentHTML('beforeend', ` 
+            <tr> 
+              <td><strong>${a.title||''}</strong></td> 
+              <td>${a.year||''}</td> 
+              <td>${a.description||''}</td> 
+              <td> 
+                <button class="btn-icon edit-btn" onclick="editAchievement('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button> 
+                <button class="btn-icon del" onclick="delDoc('Achievements','${d.id}','ach-msg', loadAchievements)"><i class="fas fa-trash"></i></button> 
+              </td> 
+            </tr>`); 
+        }); 
+      } catch(e) { console.error(e); } 
+    } 
+  
+    window.editAchievement = (id, dataStr) => { 
+      const a = JSON.parse(dataStr); 
+      document.getElementById('ach-edit-id').value = id; 
+      document.getElementById('ach-title').value = a.title || ''; 
+      document.getElementById('ach-desc').value = a.description || ''; 
+      document.getElementById('ach-year').value = a.year || ''; 
+      const banner = document.getElementById('ach-editing-banner'); 
+      banner.classList.add('active'); 
+      document.getElementById('ach-editing-label').textContent = 'Editing: ' + (a.title || 'achievement'); 
+      document.getElementById('ach-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Achievement'; 
+      document.getElementById('ach-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes'; 
+      document.getElementById('ach-cancel').style.display = ''; 
+      document.getElementById('ach-title').scrollIntoView({ behavior: 'smooth' }); 
+    }; 
+  
+    document.getElementById('ach-cancel').addEventListener('click', () => { 
+      resetForm( 
+        ['ach-edit-id','ach-title','ach-desc','ach-year'], 
+        'ach-edit-id', 
+        document.getElementById('ach-editing-banner'), 
+        document.getElementById('ach-form-title'), 
+        document.getElementById('ach-save'), 
+        document.getElementById('ach-cancel'), 
+        '<i class="fas fa-plus-circle"></i> Add Achievement', 
+        '<i class="fas fa-floppy-disk"></i> Save Achievement' 
+      ); 
+    }); 
+  
+    document.getElementById('ach-save').addEventListener('click', async () => { 
+      const editId = document.getElementById('ach-edit-id').value; 
+      const title  = document.getElementById('ach-title').value.trim(); 
+      const desc   = document.getElementById('ach-desc').value.trim(); 
+      const year   = parseInt(document.getElementById('ach-year').value); 
+      if (!title || !desc || !year) { msg('ach-msg','Please fill all required fields.','err'); return; } 
+      try { 
+        const data = { title, description: desc, year }; 
+        if (editId) { 
+          await updateDoc(doc(db, 'Achievements', editId), data); 
+          msg('ach-msg', 'Achievement updated!', 'ok'); 
+        } else { 
+          await addDoc(collection(db, 'Achievements'), { ...data, createdBy: auth.currentUser?.uid || '' }); 
+          msg('ach-msg', 'Achievement saved!', 'ok'); 
+        } 
+        document.getElementById('ach-cancel').click(); 
+        loadAchievements(); 
+      } catch(e) { msg('ach-msg', 'Error: ' + e.message, 'err'); } 
+    }); 
+  
+    // ══════════════════════════════════════════ 
+    // ── CONTACTS (read-only, delete only) ── 
+    // ══════════════════════════════════════════ 
+    async function loadContacts() { 
+      const tbody = document.getElementById('ct-tbody'); 
+      try { 
+        const snap = await getDocs(query(collection(db, 'Contacts'), orderBy('submittedAt', 'desc'))); 
+        document.getElementById('statContacts').textContent = snap.size; 
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i> No submissions yet.</td></tr>'; return; } 
+        tbody.innerHTML = ''; 
+        snap.forEach(d => { 
+          const c = d.data(); 
+          tbody.insertAdjacentHTML('beforeend', ` 
+            <tr> 
+              <td><strong>${c.firstName||''} ${c.lastName||''}</strong></td> 
+              <td><a href="mailto:${c.email||''}">${c.email||''}</a></td> 
+              <td>${c.interest||''}</td> 
+              <td style="max-width:260px; white-space:pre-wrap;">${c.message||''}</td> 
+              <td>${fmtDate(c.submittedAt)}</td> 
+              <td><button class="btn-icon del" onclick="delDoc('Contacts','${d.id}','', loadContacts)"><i class="fas fa-trash"></i></button></td> 
+            </tr>`); 
+        }); 
+      } catch(e) { console.error(e); } 
+    } 
+  
+    // ── Shared delete ── 
+    window.delDoc = async (col, id, msgId, reloadFn) => { 
+      if (!confirm('Delete this record? This cannot be undone.')) return; 
+      try { 
+        await deleteDoc(doc(db, col, id)); 
+        if (msgId) msg(msgId, 'Deleted.', 'ok'); 
+        reloadFn(); 
+      } catch(e) { alert('Error: ' + e.message); } 
+    }; 
+  
+    window.loadEventsStat = loadEventsStat; 
+    window.loadJobs = loadJobs; 
+    window.loadBoard = loadBoard; 
+    window.loadAchievements = loadAchievements; 
+    window.loadContacts = loadContacts; 
+  
+    // ── Initial load ── 
+    loadEventsStat(); 
+    loadJobs(); 
+    loadBoard(); 
+    loadAchievements(); 
+    loadContacts(); 
+  </script> 
+</body> 
+</html> 
