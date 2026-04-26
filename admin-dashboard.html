@@ -65,6 +65,11 @@
     .btn-cancel:hover { background: var(--gray-200); } 
     .editing-banner { background: #dbeafe; border: 1px solid #93c5fd; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #1d4ed8; display: none; } 
     .editing-banner.active { display: flex; align-items: center; gap: 0.5rem; } 
+
+    .ct-view-toggle { display: flex; gap: 0; background: var(--gray-100); border-radius: 8px; padding: 3px; }
+    .ct-toggle-btn { padding: 0.45rem 1rem; border-radius: 6px; border: none; background: transparent; font-size: 0.83rem; font-weight: 600; color: var(--gray-500); cursor: pointer; transition: all 0.18s; display: flex; align-items: center; gap: 0.4rem; }
+    .ct-toggle-btn.active { background: white; color: var(--gray-900); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .ct-count { font-weight: 400; opacity: 0.7; }
   </style> 
 </head> 
 <body> 
@@ -103,6 +108,7 @@
         <button class="admin-tab" data-tab="jobs"><i class="fas fa-briefcase"></i> Job Postings</button> 
         <button class="admin-tab" data-tab="board"><i class="fas fa-users"></i> Exec Board</button> 
         <button class="admin-tab" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button> 
+        <button class="admin-tab" data-tab="testimonials"><i class="fas fa-quote-left"></i> Testimonials</button>
         <button class="admin-tab" data-tab="contacts"><i class="fas fa-envelope"></i> Contact Submissions</button> 
       </div> 
   
@@ -214,7 +220,10 @@
           <input type="hidden" id="ach-edit-id"> 
           <div class="admin-field"><label>Title *</label><input type="text" id="ach-title" placeholder="1st Place — Case Competition"></div> 
           <div class="admin-field"><label>Description *</label><textarea id="ach-desc" placeholder="Brief description..."></textarea></div> 
-          <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div> 
+          <div class="admin-row-2">
+            <div class="admin-field"><label>Year *</label><input type="number" id="ach-year" placeholder="2026" min="2000" max="2100"></div>
+            <div class="admin-field"><label>Photo URL (optional)</label><input type="url" id="ach-photo" placeholder="https://www.instagram.com/p/..."></div>
+          </div>
           <div class="admin-form-actions"> 
             <button class="btn btn-primary" id="ach-save"><i class="fas fa-floppy-disk"></i> Save Achievement</button> 
             <button class="btn-cancel" id="ach-cancel" style="display:none;">Cancel Edit</button> 
@@ -229,8 +238,48 @@
         </div> 
       </div> 
   
+      <!-- ── TESTIMONIALS PANEL ── -->
+      <div class="admin-panel" id="panel-testimonials">
+        <div class="admin-form">
+          <div class="editing-banner" id="tm-editing-banner"><i class="fas fa-pen"></i> <span id="tm-editing-label">Editing testimonial</span></div>
+          <h3 id="tm-form-title"><i class="fas fa-plus-circle"></i> Add Testimonial</h3>
+          <input type="hidden" id="tm-edit-id">
+          <div class="admin-field"><label>Quote * <span style="font-weight:400; color:var(--gray-500);">(do not include quotes — they are added automatically)</span></label><textarea id="tm-quote" placeholder="ISS connected me with the recruiter who got me my internship..."></textarea></div>
+          <div class="admin-row-2">
+            <div class="admin-field"><label>Full Name *</label><input type="text" id="tm-name" placeholder="Jordan L."></div>
+            <div class="admin-field"><label>Role / Title *</label><input type="text" id="tm-role" placeholder="Technology Consultant, Deloitte"></div>
+          </div>
+          <div class="admin-row-2">
+            <div class="admin-field"><label>Graduation Year</label><input type="text" id="tm-year" placeholder="IS '25"></div>
+            <div class="admin-field"><label>Display Order</label><input type="number" id="tm-order" placeholder="1, 2, 3..."></div>
+          </div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="tm-save"><i class="fas fa-floppy-disk"></i> Save Testimonial</button>
+            <button class="btn-cancel" id="tm-cancel" style="display:none;">Cancel Edit</button>
+          </div>
+          <p class="admin-msg" id="tm-msg"></p>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Quote</th><th>Order</th><th>Actions</th></tr></thead>
+            <tbody id="tm-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ── CONTACTS PANEL ── --> 
       <div class="admin-panel" id="panel-contacts"> 
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+          <div class="ct-view-toggle">
+            <button class="ct-toggle-btn active" id="ct-btn-open" onclick="setContactView('open')">
+              <i class="fas fa-inbox"></i> Open <span class="ct-count" id="ct-count-open"></span>
+            </button>
+            <button class="ct-toggle-btn" id="ct-btn-resolved" onclick="setContactView('resolved')">
+              <i class="fas fa-check-circle"></i> Resolved <span class="ct-count" id="ct-count-resolved"></span>
+            </button>
+          </div>
+          <p class="admin-msg" id="ct-msg" style="margin:0;"></p>
+        </div>
         <div class="admin-table-wrap"> 
           <table class="admin-table"> 
             <thead><tr><th>Name</th><th>Email</th><th>Interest</th><th>Message</th><th>Submitted</th><th>Actions</th></tr></thead> 
@@ -521,7 +570,8 @@
       document.getElementById('ach-edit-id').value = id; 
       document.getElementById('ach-title').value = a.title || ''; 
       document.getElementById('ach-desc').value = a.description || ''; 
-      document.getElementById('ach-year').value = a.year || ''; 
+      document.getElementById('ach-year').value = a.year || '';
+      document.getElementById('ach-photo').value = a.photoUrl || ''; 
       const banner = document.getElementById('ach-editing-banner'); 
       banner.classList.add('active'); 
       document.getElementById('ach-editing-label').textContent = 'Editing: ' + (a.title || 'achievement'); 
@@ -533,7 +583,7 @@
   
     document.getElementById('ach-cancel').addEventListener('click', () => { 
       resetForm( 
-        ['ach-edit-id','ach-title','ach-desc','ach-year'], 
+        ['ach-edit-id','ach-title','ach-desc','ach-year','ach-photo'], 
         'ach-edit-id', 
         document.getElementById('ach-editing-banner'), 
         document.getElementById('ach-form-title'), 
@@ -551,7 +601,8 @@
       const year   = parseInt(document.getElementById('ach-year').value); 
       if (!title || !desc || !year) { msg('ach-msg','Please fill all required fields.','err'); return; } 
       try { 
-        const data = { title, description: desc, year }; 
+        const photo = document.getElementById('ach-photo').value.trim();
+      const data = { title, description: desc, year, photoUrl: photo || '' }; 
         if (editId) { 
           await updateDoc(doc(db, 'Achievements', editId), data); 
           msg('ach-msg', 'Achievement updated!', 'ok'); 
@@ -564,18 +615,36 @@
       } catch(e) { msg('ach-msg', 'Error: ' + e.message, 'err'); } 
     }); 
   
-    // ══════════════════════════════════════════ 
-    // ── CONTACTS (read-only, delete only) ── 
-    // ══════════════════════════════════════════ 
+    // ════════════════════════════════════════════ 
+    // ── CONTACTS ── 
+    // ════════════════════════════════════════════ 
+    let ctCurrentView = 'open';
+
+    window.setContactView = function(view) {
+      ctCurrentView = view;
+      document.getElementById('ct-btn-open').classList.toggle('active', view === 'open');
+      document.getElementById('ct-btn-resolved').classList.toggle('active', view === 'resolved');
+      loadContacts();
+    };
+
     async function loadContacts() { 
       const tbody = document.getElementById('ct-tbody'); 
       try { 
         const snap = await getDocs(query(collection(db, 'Contacts'), orderBy('submittedAt', 'desc'))); 
-        document.getElementById('statContacts').textContent = snap.size; 
-        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i> No submissions yet.</td></tr>'; return; } 
+        const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const open     = all.filter(c => !c.status || c.status === 'open');
+        const resolved = all.filter(c => c.status === 'resolved');
+        document.getElementById('statContacts').textContent = open.length;
+        document.getElementById('ct-count-open').textContent = open.length ? `(${open.length})` : '';
+        document.getElementById('ct-count-resolved').textContent = resolved.length ? `(${resolved.length})` : '';
+        const items = ctCurrentView === 'open' ? open : resolved;
+        if (!items.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="fas fa-${ctCurrentView === 'open' ? 'inbox' : 'check-circle'}"></i> No ${ctCurrentView} submissions.</td></tr>`;
+          return;
+        }
         tbody.innerHTML = ''; 
-        snap.forEach(d => { 
-          const c = d.data(); 
+        items.forEach(c => { 
+          const isResolved = c.status === 'resolved';
           tbody.insertAdjacentHTML('beforeend', ` 
             <tr> 
               <td><strong>${c.firstName||''} ${c.lastName||''}</strong></td> 
@@ -583,12 +652,109 @@
               <td>${c.interest||''}</td> 
               <td style="max-width:260px; white-space:pre-wrap;">${c.message||''}</td> 
               <td>${fmtDate(c.submittedAt)}</td> 
-              <td><button class="btn-icon del" onclick="delDoc('Contacts','${d.id}','', loadContacts)"><i class="fas fa-trash"></i></button></td> 
+              <td style="display:flex; gap:0.35rem; align-items:center;">
+                ${!isResolved
+                  ? `<button class="btn-icon" title="Mark resolved" onclick="resolveContact('${c.id}', true)"><i class="fas fa-check" style="color:#166534;"></i></button>`
+                  : `<button class="btn-icon" title="Reopen" onclick="resolveContact('${c.id}', false)"><i class="fas fa-rotate-left" style="color:#1d4ed8;"></i></button>`
+                }
+                ${isResolved
+                  ? `<button class="btn-icon del" title="Delete permanently" onclick="delDoc('Contacts','${c.id}','ct-msg', loadContacts)"><i class="fas fa-trash"></i></button>`
+                  : ''
+                }
+              </td>
             </tr>`); 
         }); 
       } catch(e) { console.error(e); } 
-    } 
+    }
+
+    window.resolveContact = async (id, resolve) => {
+      try {
+        await updateDoc(doc(db, 'Contacts', id), { status: resolve ? 'resolved' : 'open' });
+        msg('ct-msg', resolve ? 'Marked as resolved.' : 'Reopened.', 'ok');
+        loadContacts();
+      } catch(e) { msg('ct-msg', 'Error: ' + e.message, 'err'); }
+    };
   
+
+    // ══════════════════════════════════════════
+    // ── TESTIMONIALS ──
+    // ══════════════════════════════════════════
+    async function loadTestimonials() {
+      const tbody = document.getElementById('tm-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Testimonials'), orderBy('displayOrder', 'asc')));
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-quote-left"></i> No testimonials yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const t = d.data();
+          const dataAttr = encodeURIComponent(JSON.stringify(t));
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${t.name||''}</strong></td>
+              <td>${t.role||''}</td>
+              <td style="max-width:280px; color:var(--gray-600); font-style:italic;">"${(t.quote||'').slice(0,80)}${t.quote?.length > 80 ? '...' : ''}"</td>
+              <td style="text-align:center;">${t.displayOrder ?? '—'}</td>
+              <td>
+                <button class="btn-icon edit-btn" onclick="editTestimonial('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon del" onclick="delDoc('Testimonials','${d.id}','tm-msg', loadTestimonials)"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+
+    window.editTestimonial = (id, dataStr) => {
+      const t = JSON.parse(dataStr);
+      document.getElementById('tm-edit-id').value = id;
+      document.getElementById('tm-quote').value = t.quote || '';
+      document.getElementById('tm-name').value = t.name || '';
+      document.getElementById('tm-role').value = t.role || '';
+      document.getElementById('tm-year').value = t.graduationYear || '';
+      document.getElementById('tm-order').value = t.displayOrder || '';
+      const banner = document.getElementById('tm-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('tm-editing-label').textContent = 'Editing: ' + (t.name || 'testimonial');
+      document.getElementById('tm-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Testimonial';
+      document.getElementById('tm-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('tm-cancel').style.display = '';
+      document.getElementById('tm-quote').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    document.getElementById('tm-cancel').addEventListener('click', () => {
+      resetForm(
+        ['tm-edit-id','tm-quote','tm-name','tm-role','tm-year','tm-order'],
+        'tm-edit-id',
+        document.getElementById('tm-editing-banner'),
+        document.getElementById('tm-form-title'),
+        document.getElementById('tm-save'),
+        document.getElementById('tm-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add Testimonial',
+        '<i class="fas fa-floppy-disk"></i> Save Testimonial'
+      );
+    });
+
+    document.getElementById('tm-save').addEventListener('click', async () => {
+      const editId = document.getElementById('tm-edit-id').value;
+      const quote  = document.getElementById('tm-quote').value.trim();
+      const name   = document.getElementById('tm-name').value.trim();
+      const role   = document.getElementById('tm-role').value.trim();
+      const gradYear = document.getElementById('tm-year').value.trim();
+      const order  = parseInt(document.getElementById('tm-order').value) || 99;
+      if (!quote || !name || !role) { msg('tm-msg', 'Quote, name, and role are required.', 'err'); return; }
+      try {
+        const data = { quote, name, role, graduationYear: gradYear, displayOrder: order };
+        if (editId) {
+          await updateDoc(doc(db, 'Testimonials', editId), data);
+          msg('tm-msg', 'Testimonial updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Testimonials'), { ...data, createdBy: auth.currentUser?.uid || '' });
+          msg('tm-msg', 'Testimonial saved!', 'ok');
+        }
+        document.getElementById('tm-cancel').click();
+        loadTestimonials();
+      } catch(e) { msg('tm-msg', 'Error: ' + e.message, 'err'); }
+    });
+
     // ── Shared delete ── 
     window.delDoc = async (col, id, msgId, reloadFn) => { 
       if (!confirm('Delete this record? This cannot be undone.')) return; 
@@ -599,7 +765,8 @@
       } catch(e) { alert('Error: ' + e.message); } 
     }; 
   
-    window.loadEventsStat = loadEventsStat; 
+    window.loadEventsStat = loadEventsStat;
+    window.loadTestimonials = loadTestimonials; 
     window.loadJobs = loadJobs; 
     window.loadBoard = loadBoard; 
     window.loadAchievements = loadAchievements; 
@@ -613,4 +780,4 @@
     loadContacts(); 
   </script> 
 </body> 
-</html> 
+</html>

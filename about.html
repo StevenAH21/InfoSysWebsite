@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About | ISS @ UW-Madison</title>
+  <link rel="icon" href="ISS logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Achievements ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .ach-card { background: var(--white, #fff); border: 1px solid var(--gray-200); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+    .ach-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .ach-card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 2rem; }
+    .ach-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .ach-card-img.no-photo { height: 80px; aspect-ratio: unset; background: rgba(197,5,12,0.06); color: var(--uw-red); font-size: 2rem; }
+    .ach-card-body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+    .ach-card-year { font-size: 0.75rem; font-weight: 700; color: var(--uw-red); letter-spacing: 0.06em; text-transform: uppercase; }
+    .ach-card-title { font-size: 1.1rem; font-weight: 700; color: var(--gray-900); }
+    .ach-card-desc { font-size: 0.88rem; color: var(--gray-600); line-height: 1.6; margin-top: 0.2rem; }
+
+    /* ── Testimonials ── */
+    .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+    .test-card { background: var(--white, #fff); border: 1px solid var(--gray-200); border-radius: 16px; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
+    .test-quote { font-size: 0.95rem; color: var(--gray-700); line-height: 1.75; font-style: italic; flex: 1; }
+    .test-author { display: flex; align-items: center; gap: 0.85rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); }
+    .test-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--uw-red); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+    .test-name { font-size: 0.88rem; font-weight: 700; color: var(--gray-900); }
+    .test-role { font-size: 0.78rem; color: var(--gray-500); margin-top: 1px; }
+
+    /* ── Instagram card ── */
+    .ig-card { display: flex; align-items: center; gap: 1.75rem; background: white; border: 1px solid var(--gray-200); border-radius: 16px; padding: 2rem; }
+    .ig-icon { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ig-icon i { font-size: 1.8rem; color: white; }
+    .ig-text h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .ig-text p { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 1rem; }
+
+    /* ── Team teaser ── */
+    .team-teaser { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .team-teaser-card { background: white; border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .team-teaser-avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--uw-red); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; margin: 0 auto 0.75rem; overflow: hidden; }
+    .team-teaser-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .team-teaser-name { font-size: 0.85rem; font-weight: 700; color: var(--gray-900); }
+    .team-teaser-role { font-size: 0.75rem; color: var(--gray-500); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="ISS logo.png" alt="ISS Logo">
+        <span>ISS</span> @ UW-Madison
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="exec-board.html">Leadership</a></li>
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>About <span>ISS</span></h1>
+      <p>We connect students to the business technology world — through real events, real companies, and real people.</p>
+    </div>
+  </section>
+
+  <!-- Our Story -->
+  <section>
+    <div class="container mission-grid">
+      <div class="mission-text reveal-left">
+        <h2>Who We Are</h2>
+        <p>The Information Systems Society is a student-run organization at the Wisconsin School of Business dedicated to bridging the gap between IS education and the professional world.</p>
+        <p style="margin-top: 1rem;">We create opportunities that your classes can't &mdash; direct access to companies, alumni, and peers who are working through the same questions you are. If you're interested in how technology shapes modern business, there's a place for you here.</p>
+      </div>
+      <div class="mission-image reveal-right">
+        <img src="UW Business School.png" style="width: 600px;">
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item"><h3>100+</h3><p>Active Members</p></div>
+        <div class="stat-item"><h3>20+</h3><p>Events Per Year</p></div>
+        <div class="stat-item"><h3>15+</h3><p>Company Partners</p></div>
+        <div class="stat-item"><h3>500+</h3><p>Alumni Network</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <section style="background: var(--gray-100);">
+    <div class="container">
+      <div class="section-header reveal-up">
+        <h2>Achievements</h2>
+        <p class="section-subtitle">Milestones and recognition from our history</p>
+      </div>
+      <div class="ach-grid" id="achGrid">
+        <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--gray-500);">
+          <i class="fas fa-spinner fa-spin" style="font-size:2rem; margin-bottom:1rem; display:block;"></i>
+          Loading achievements...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section>
+    <div class="container">
+      <div class="section-header reveal-up">
+        <h2>What Our Members Say</h2>
+        <p class="section-subtitle">Real experiences from people who've been in your shoes</p>
+      </div>
+      <div class="test-grid" id="testGrid">
+        <div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--gray-500);">
+          <i class="fas fa-spinner fa-spin" style="font-size:2rem; margin-bottom:1rem; display:block;"></i>
+          Loading testimonials...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Instagram -->
+  <section style="background: var(--gray-100);">
+    <div class="container">
+      <div class="section-header reveal-up">
+        <h2>Stay Connected</h2>
+        <p class="section-subtitle">Follow along between events</p>
+      </div>
+      <div class="ig-card reveal-up">
+        <div class="ig-icon"><i class="fab fa-instagram"></i></div>
+        <div class="ig-text">
+          <h3>@iss_uwmadison</h3>
+          <p>Event recaps, exec board spotlights, company visit highlights, and more. Give us a follow to stay in the loop.</p>
+          <a href="https://www.instagram.com/iss_uwmadison/" target="_blank" class="btn btn-primary">
+            <i class="fab fa-instagram"></i> Follow on Instagram
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Teaser -->
+  <section>
+    <div class="container">
+      <div class="section-header reveal-up">
+        <h2>Meet the Team</h2>
+        <p class="section-subtitle">The 2025&ndash;2026 exec board keeping ISS running</p>
+      </div>
+      <div class="team-teaser" id="teamTeaser">
+        <div style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--gray-500);">
+          <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; display:block; margin-bottom:0.75rem;"></i>
+          Loading...
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:2rem;">
+        <a href="exec-board.html" class="btn btn-outline">
+          <i class="fas fa-users"></i> View Full Exec Board
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container reveal-scale">
+      <h2>Want to Get Involved?</h2>
+      <p>Reach out and we'll connect you with the right people.</p>
+      <div class="btn-group" style="justify-content:center;">
+        <a href="contact.html" class="btn btn-primary"><i class="fas fa-envelope"></i> Contact Us</a>
+        <a href="events.html" class="btn btn-outline" style="border-color:white; color:white;"><i class="fas fa-calendar"></i> See Events</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="ISS logo.png" alt="ISS Logo">
+          <p>Information Systems Society at the University of Wisconsin-Madison. Connecting students to the world of business technology.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/iss_uwmadison/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/uw-madison-information-systems-society" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="mailto:iss@wisc.edu" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div><h4>Pages</h4><ul>
+          <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li>
+          <li><a href="events.html">Events</a></li><li><a href="exec-board.html">Leadership</a></li>
+          <li><a href="careers.html">Careers</a></li><li><a href="contact.html">Contact</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul></div>
+        <div><h4>Resources</h4><ul>
+          <li><a href="https://win.wisc.edu/organization/iss" target="_blank">Join on WIN</a></li>
+          <li><a href="https://business.wisc.edu" target="_blank">Wisconsin School of Business</a></li>
+          <li><a href="careers.html">Job Board</a></li>
+        </ul></div>
+        <div><h4>Contact</h4><ul>
+          <li><a href="mailto:iss@wisc.edu"><i class="fas fa-envelope" style="width:16px;"></i> iss@wisc.edu</a></li>
+          <li><i class="fas fa-map-marker-alt" style="width:16px;"></i> Grainger Hall, Madison WI</li>
+        </ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Information Systems Society &mdash; UW-Madison. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ── Achievements ──
+    async function loadAchievements() {
+      const grid = document.getElementById('achGrid');
+      try {
+        const snap = await getDocs(query(collection(db, 'Achievements'), orderBy('year', 'desc')));
+        if (snap.empty) {
+          grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--gray-500);">No achievements yet — check back soon!</p>';
+          return;
+        }
+        grid.innerHTML = '';
+        snap.forEach(d => {
+          const a = d.data();
+          const hasPhoto = !!a.photoUrl;
+          grid.insertAdjacentHTML('beforeend', `
+            <div class="ach-card">
+              <div class="ach-card-img ${hasPhoto ? '' : 'no-photo'}">
+                ${hasPhoto
+                  ? `<img src="${a.photoUrl}" alt="${a.title}" loading="lazy">`
+                  : `<i class="fas fa-trophy"></i>`}
+              </div>
+              <div class="ach-card-body">
+                <div class="ach-card-year">${a.year || ''}</div>
+                <div class="ach-card-title">${a.title || ''}</div>
+                <div class="ach-card-desc">${a.description || ''}</div>
+              </div>
+            </div>`);
+        });
+      } catch(e) { console.error(e); grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--gray-500);">Could not load achievements.</p>'; }
+    }
+
+    // ── Testimonials ──
+    async function loadTestimonials() {
+      const grid = document.getElementById('testGrid');
+      try {
+        const snap = await getDocs(query(collection(db, 'Testimonials'), orderBy('displayOrder', 'asc')));
+        if (snap.empty) {
+          grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:2rem; color:var(--gray-500);">No testimonials yet.</p>';
+          return;
+        }
+        grid.innerHTML = '';
+        snap.forEach(d => {
+          const t = d.data();
+          const initials = (t.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          grid.insertAdjacentHTML('beforeend', `
+            <div class="test-card">
+              <p class="test-quote">"${t.quote || ''}"</p>
+              <div class="test-author">
+                <div class="test-avatar">${initials}</div>
+                <div>
+                  <div class="test-name">${t.name || ''}</div>
+                  <div class="test-role">${[t.role, t.graduationYear].filter(Boolean).join(' · ')}</div>
+                </div>
+              </div>
+            </div>`);
+        });
+      } catch(e) { console.error(e); grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--gray-500);">Could not load testimonials.</p>'; }
+    }
+
+    // ── Team teaser (first 4 members) ──
+    async function loadTeamTeaser() {
+      const grid = document.getElementById('teamTeaser');
+      try {
+        const snap = await getDocs(query(collection(db, 'Leadership'), orderBy('displayOrder', 'asc')));
+        if (snap.empty) { grid.innerHTML = ''; return; }
+        const members = snap.docs.slice(0, 4);
+        grid.innerHTML = '';
+        members.forEach(d => {
+          const m = d.data();
+          const initials = (m.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          grid.insertAdjacentHTML('beforeend', `
+            <div class="team-teaser-card">
+              <div class="team-teaser-avatar">
+                ${m.photoUrl
+                  ? `<img src="${m.photoUrl}" alt="${m.name}">`
+                  : initials}
+              </div>
+              <div class="team-teaser-name">${m.name || ''}</div>
+              <div class="team-teaser-role">${m.role || ''}</div>
+            </div>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+
+    loadAchievements();
+    loadTestimonials();
+    loadTeamTeaser();
+  </script>
+
+  <script>
+    window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
+    document.getElementById('hamburger').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+    document.querySelectorAll('.nav-links a').forEach(l => l.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
+  </script>
+  <script src="animations.js"></script>
+</body>
+</html>
