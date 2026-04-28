@@ -109,6 +109,7 @@
         <button class="admin-tab" data-tab="board"><i class="fas fa-users"></i> Exec Board</button> 
         <button class="admin-tab" data-tab="achievements"><i class="fas fa-trophy"></i> Achievements</button> 
         <button class="admin-tab" data-tab="testimonials"><i class="fas fa-quote-left"></i> Testimonials</button>
+        <button class="admin-tab" data-tab="announcements"><i class="fas fa-bullhorn"></i> Announcements</button>
         <button class="admin-tab" data-tab="contacts"><i class="fas fa-envelope"></i> Contact Submissions</button> 
       </div> 
   
@@ -263,6 +264,37 @@
           <table class="admin-table">
             <thead><tr><th>Name</th><th>Role</th><th>Quote</th><th>Order</th><th>Actions</th></tr></thead>
             <tbody id="tm-tbody"><tr><td colspan="5" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS PANEL ── -->
+      <div class="admin-panel" id="panel-announcements">
+        <div class="admin-form">
+          <div class="editing-banner" id="ann-editing-banner"><i class="fas fa-pen"></i> <span id="ann-editing-label">Editing announcement</span></div>
+          <h3 id="ann-form-title"><i class="fas fa-plus-circle"></i> Add Announcement</h3>
+          <input type="hidden" id="ann-edit-id">
+          <div class="admin-field"><label>Title * <span style="font-weight:400; color:var(--gray-500);">— shown in the announcement bar</span></label><input type="text" id="ann-title" placeholder="Exec Board Applications are Open!"></div>
+          <div class="admin-field"><label>Short Description <span style="font-weight:400; color:var(--gray-500);">(optional)</span></label><input type="text" id="ann-desc" placeholder="Applications close April 23rd at 11:59 PM"></div>
+          <div class="admin-row-3">
+            <div class="admin-field"><label>Button Label *</label><input type="text" id="ann-btn" placeholder="Apply Now"></div>
+            <div class="admin-field"><label>URL *</label><input type="url" id="ann-url" placeholder="https://forms.gle/..."></div>
+            <div class="admin-field"><label>Expiration Date <span style="font-weight:400; color:var(--gray-500);">(optional — auto-hides after)</span></label><input type="date" id="ann-expires"></div>
+          </div>
+          <div class="admin-form-actions">
+            <button class="btn btn-primary" id="ann-save"><i class="fas fa-floppy-disk"></i> Save Announcement</button>
+            <button class="btn-cancel" id="ann-cancel" style="display:none;">Cancel Edit</button>
+          </div>
+          <p class="admin-msg" id="ann-msg"></p>
+        </div>
+        <div style="background:#fef9c3; border:1px solid #fde68a; border-radius:10px; padding:0.85rem 1.1rem; font-size:0.83rem; color:#92400e; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem;">
+          <i class="fas fa-lightbulb"></i>
+          <span>Only <strong>one announcement</strong> can be active at a time. Activating a new one automatically deactivates the current one.</span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Title</th><th>Description</th><th>Button</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="ann-tbody"><tr><td colspan="6" class="empty-state"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -755,6 +787,125 @@
       } catch(e) { msg('tm-msg', 'Error: ' + e.message, 'err'); }
     });
 
+
+    // ══════════════════════════════════════════
+    // ── ANNOUNCEMENTS ──
+    // ══════════════════════════════════════════
+    async function loadAnnouncements() {
+      const tbody = document.getElementById('ann-tbody');
+      try {
+        const snap = await getDocs(query(collection(db, 'Announcements'), orderBy('createdAt', 'desc')));
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-bullhorn"></i> No announcements yet.</td></tr>'; return; }
+        tbody.innerHTML = '';
+        snap.forEach(d => {
+          const a = d.data();
+          const isActive = a.isActive === true;
+          const expired = a.expiresAt && a.expiresAt.toDate && a.expiresAt.toDate() < new Date();
+          const dataAttr = encodeURIComponent(JSON.stringify(a));
+          const expiryStr = a.expiresAt?.toDate ? a.expiresAt.toDate().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td><strong>${a.title||''}</strong></td>
+              <td style="color:var(--gray-500); font-size:0.82rem;">${a.description||'—'}</td>
+              <td><a href="${a.url||'#'}" target="_blank" style="color:var(--uw-red); font-size:0.82rem;">${a.buttonLabel||''}</a></td>
+              <td style="font-size:0.82rem;">${expiryStr}</td>
+              <td>
+                ${expired
+                  ? '<span class="badge badge-inactive">Expired</span>'
+                  : `<span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span>`}
+              </td>
+              <td style="display:flex; gap:0.35rem; align-items:center;">
+                ${!isActive && !expired ? `<button class="btn-icon" title="Set Active" onclick="activateAnnouncement('${d.id}')"><i class="fas fa-circle-check" style="color:#166534;"></i></button>` : ''}
+                ${isActive ? `<button class="btn-icon" title="Deactivate" onclick="deactivateAnnouncement('${d.id}')"><i class="fas fa-circle-xmark" style="color:#991b1b;"></i></button>` : ''}
+                <button class="btn-icon edit-btn" onclick="editAnnouncement('${d.id}', decodeURIComponent('${dataAttr}'))"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon del" onclick="delDoc('Announcements','${d.id}','ann-msg', loadAnnouncements)"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>`);
+        });
+      } catch(e) { console.error(e); }
+    }
+
+    window.activateAnnouncement = async (id) => {
+      try {
+        // Deactivate all first
+        const snap = await getDocs(collection(db, 'Announcements'));
+        const batch = [];
+        snap.forEach(d => { if (d.data().isActive) batch.push(updateDoc(doc(db, 'Announcements', d.id), { isActive: false })); });
+        await Promise.all(batch);
+        // Activate selected
+        await updateDoc(doc(db, 'Announcements', id), { isActive: true });
+        msg('ann-msg', 'Announcement is now live on the site!', 'ok');
+        loadAnnouncements();
+      } catch(e) { msg('ann-msg', 'Error: ' + e.message, 'err'); }
+    };
+
+    window.deactivateAnnouncement = async (id) => {
+      try {
+        await updateDoc(doc(db, 'Announcements', id), { isActive: false });
+        msg('ann-msg', 'Announcement hidden.', 'ok');
+        loadAnnouncements();
+      } catch(e) { msg('ann-msg', 'Error: ' + e.message, 'err'); }
+    };
+
+    window.editAnnouncement = (id, dataStr) => {
+      const a = JSON.parse(dataStr);
+      document.getElementById('ann-edit-id').value = id;
+      document.getElementById('ann-title').value = a.title || '';
+      document.getElementById('ann-desc').value = a.description || '';
+      document.getElementById('ann-btn').value = a.buttonLabel || '';
+      document.getElementById('ann-url').value = a.url || '';
+      if (a.expiresAt?.toDate) {
+        const d = a.expiresAt.toDate();
+        document.getElementById('ann-expires').value = d.toISOString().split('T')[0];
+      }
+      const banner = document.getElementById('ann-editing-banner');
+      banner.classList.add('active');
+      document.getElementById('ann-editing-label').textContent = 'Editing: ' + (a.title || 'announcement');
+      document.getElementById('ann-form-title').innerHTML = '<i class="fas fa-pen"></i> Edit Announcement';
+      document.getElementById('ann-save').innerHTML = '<i class="fas fa-floppy-disk"></i> Save Changes';
+      document.getElementById('ann-cancel').style.display = '';
+      document.getElementById('ann-title').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    document.getElementById('ann-cancel').addEventListener('click', () => {
+      resetForm(
+        ['ann-edit-id','ann-title','ann-desc','ann-btn','ann-url','ann-expires'],
+        'ann-edit-id',
+        document.getElementById('ann-editing-banner'),
+        document.getElementById('ann-form-title'),
+        document.getElementById('ann-save'),
+        document.getElementById('ann-cancel'),
+        '<i class="fas fa-plus-circle"></i> Add Announcement',
+        '<i class="fas fa-floppy-disk"></i> Save Announcement'
+      );
+    });
+
+    document.getElementById('ann-save').addEventListener('click', async () => {
+      const editId  = document.getElementById('ann-edit-id').value;
+      const title   = document.getElementById('ann-title').value.trim();
+      const desc    = document.getElementById('ann-desc').value.trim();
+      const btnLabel = document.getElementById('ann-btn').value.trim();
+      const url     = document.getElementById('ann-url').value.trim();
+      const expires = document.getElementById('ann-expires').value;
+      if (!title || !btnLabel || !url) { msg('ann-msg', 'Title, button label, and URL are required.', 'err'); return; }
+      try {
+        const data = {
+          title, description: desc, buttonLabel: btnLabel, url,
+          expiresAt: expires ? new Date(expires + 'T23:59:59') : null,
+          isActive: false
+        };
+        if (editId) {
+          await updateDoc(doc(db, 'Announcements', editId), data);
+          msg('ann-msg', 'Announcement updated!', 'ok');
+        } else {
+          await addDoc(collection(db, 'Announcements'), { ...data, createdAt: serverTimestamp(), createdBy: auth.currentUser?.uid || '' });
+          msg('ann-msg', 'Announcement saved! Activate it when ready.', 'ok');
+        }
+        document.getElementById('ann-cancel').click();
+        loadAnnouncements();
+      } catch(e) { msg('ann-msg', 'Error: ' + e.message, 'err'); }
+    });
+
     // ── Shared delete ── 
     window.delDoc = async (col, id, msgId, reloadFn) => { 
       if (!confirm('Delete this record? This cannot be undone.')) return; 
@@ -766,6 +917,7 @@
     }; 
   
     window.loadEventsStat = loadEventsStat;
+    window.loadAnnouncements = loadAnnouncements;
     window.loadTestimonials = loadTestimonials; 
     window.loadJobs = loadJobs; 
     window.loadBoard = loadBoard; 
@@ -773,7 +925,8 @@
     window.loadContacts = loadContacts; 
   
     // ── Initial load ── 
-    loadEventsStat(); 
+    loadEventsStat();
+    loadAnnouncements(); 
     loadJobs(); 
     loadBoard(); 
     loadAchievements(); 
