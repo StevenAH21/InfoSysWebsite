@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | ISS @ UW-Madison</title>
+  <link rel="icon" href="ISS logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+ 
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="ISS logo.png" alt="ISS Logo">
+        <span>ISS</span> @ UW-Madison
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="events.html">Events</a></li>
+        <!-- <li><a href="exec-board.html">Leadership</a></li> -->
+        <li><a href="careers.html">Careers</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="login.html" class="active">Login</a></li>
+        <!-- <li><a href="contact.html" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Contact Us</a></li> -->
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+ 
+  <!-- ── Announcement Bar ── -->
+    <div id="ann-bar" style="display:none; background:var(--uw-red); color:white; padding:0.6rem 1rem; font-size:0.85rem; position:relative; z-index:999;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <i class="fas fa-bullhorn"></i>
+        <span id="ann-bar-title" style="font-weight:600;"></span>
+        <span id="ann-bar-desc" style="opacity:0.85;"></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.75rem; flex-shrink:0;">
+        <a id="ann-bar-btn" href="#" target="_blank" style="background:white; color:var(--uw-red); font-weight:700; font-size:0.8rem; padding:0.3rem 0.85rem; border-radius:20px; white-space:nowrap;">—</a>
+        <button onclick="document.getElementById('ann-bar').style.display='none'; sessionStorage.setItem('ann-dismissed','1');" style="background:none; border:none; color:white; cursor:pointer; opacity:0.7; font-size:1rem; line-height:1;"><i class="fas fa-xmark"></i></button>
+        </div>
+    </div>
+    </div>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Member &amp; <span>Admin Login</span></h1>
+      <p>Sign in with your ISS account.</p>
+    </div>
+  </section>
+ 
+  <section class="form-section">
+    <div class="container">
+      <div class="form-card form-card-narrow reveal-up">
+        <form id="loginForm" novalidate>
+          <div class="form-row">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" name="email" required autocomplete="username" placeholder="you@wisc.edu">
+          </div>
+          <div class="form-row">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Your password">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;" id="loginBtn">
+            <i class="fas fa-right-to-bracket"></i> Sign in
+          </button>
+        </form>
+        <p id="loginStatus" class="form-status" role="alert"></p>
+      </div>
+    </div>
+  </section>
+ 
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="ISS logo.png" alt="ISS Logo">
+          <p>Information Systems Society at the University of Wisconsin-Madison. Connecting students to the world of business technology.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/iss_uwmadison/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/uw-madison-information-systems-society" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="mailto:iss@wisc.edu" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="careers.html">Careers</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="login.html">Login</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://win.wisc.edu/organization/iss" target="_blank">Join on WIN</a></li>
+            <li><a href="https://business.wisc.edu" target="_blank">Wisconsin School of Business</a></li>
+            <li><a href="careers.html">Job Board</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:iss@wisc.edu"><i class="fas fa-envelope" style="width:16px;"></i> iss@wisc.edu</a></li>
+            <li><i class="fas fa-map-marker-alt" style="width:16px;"></i> Grainger Hall, Madison WI</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Information Systems Society &mdash; UW-Madison. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+ 
+  <script type="module">
+    import { auth, db, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ 
+    // If already logged in, redirect
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const adminSnap = await getDoc(doc(db, 'Admins', user.uid));
+        const params = new URLSearchParams(location.search);
+        const next = params.get('next');
+        if (next && !next.startsWith('http')) { location.href = next; return; }
+        location.href = adminSnap.exists() ? 'admin-dashboard.html' : 'index.html';
+      }
+    });
+ 
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const status = document.getElementById('loginStatus');
+      const btn = document.getElementById('loginBtn');
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+ 
+      status.textContent = '';
+      status.className = 'form-status';
+ 
+      if (!email || !password) {
+        status.textContent = 'Please enter your email and password.';
+        status.className = 'form-status form-status-error';
+        return;
+      }
+ 
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+ 
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // Check if admin
+        const adminSnap = await getDoc(doc(db, 'Admins', cred.user.uid));
+        const params = new URLSearchParams(location.search);
+        const next = params.get('next');
+        if (next && !next.startsWith('http')) { location.href = next; return; }
+        location.href = adminSnap.exists() ? 'admin-dashboard.html' : 'index.html';
+      } catch (err) {
+        const msgs = {
+          'auth/user-not-found': 'No account found with that email.',
+          'auth/wrong-password': 'Incorrect password.',
+          'auth/invalid-email': 'Please enter a valid email.',
+          'auth/too-many-requests': 'Too many attempts. Please try again later.',
+          'auth/invalid-credential': 'Incorrect email or password.'
+        };
+        status.textContent = msgs[err.code] || 'Sign-in failed. Please try again.';
+        status.className = 'form-status form-status-error';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Sign in';
+      }
+    });
+  </script>
+ 
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+    });
+  </script>
+  <script src="animations.js"></script>
+  <script type="module">
+  import { db } from './firebase-config.js';
+  import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  (async () => {
+    if (sessionStorage.getItem('ann-dismissed')) return;
+    try {
+      const snap = await getDocs(query(collection(db, 'Announcements'), where('isActive', '==', true)));
+      if (snap.empty) return;
+      const a = snap.docs[0].data();
+      const expired = a.expiresAt?.toDate && a.expiresAt.toDate() < new Date();
+      if (expired) return;
+      document.getElementById('ann-bar-title').textContent = a.title || '';
+      document.getElementById('ann-bar-desc').textContent = a.description || '';
+      const btn = document.getElementById('ann-bar-btn');
+      btn.textContent = a.buttonLabel || 'Learn More';
+      btn.href = a.url || '#';
+      document.getElementById('ann-bar').style.display = '';
+    } catch(e) { console.error(e); }
+  })();
+</script>
+</body>
+</html>
+
